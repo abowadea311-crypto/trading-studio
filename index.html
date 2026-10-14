@@ -1,388 +1,1542 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Trading & Financial Analytics Dashboard V7</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>محلل الأسهم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+:root{--bg:#0b1220;--card:#121a2b;--card2:#16203a;--line:#1f2a44;--txt:#e6ebf5;--mut:#8fa0c0;--g:#22c55e;--r:#ef4444;--y:#f59e0b;--b:#3b82f6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:'Cairo','Segoe UI',Tahoma,system-ui,sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 14px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 10px}
+header h1{font-size:20px;margin:0}
+button{font-family:inherit;cursor:pointer}
+.ico{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:6px 12px;font-size:15px}
+.search{display:flex;gap:8px}
+.search input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:12px 14px;font-size:17px;font-family:inherit;direction:ltr;text-align:left;text-transform:uppercase}
+.search input::placeholder{text-transform:none;direction:rtl}
+.go{background:var(--b);border:0;color:#fff;border-radius:12px;padding:0 20px;font-size:16px;font-weight:700}
+.go:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:999px;padding:3px 12px;font-size:13px;direction:ltr;display:inline-flex;align-items:center;gap:6px}
+.chip b{color:var(--mut);font-weight:400;cursor:pointer}
+.chip.ex{color:var(--mut)}
+.lbl{font-size:12px;color:var(--mut);margin-top:6px}
+#status{color:var(--mut);padding:8px 2px;min-height:20px}
+#err{background:#2a1218;border:1px solid #5b1f2b;color:#fecaca;border-radius:12px;padding:10px 14px;margin:8px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;min-width:0}
+.card h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card h2 small{color:var(--mut);font-weight:400;font-size:12px}
+.full{grid-column:1/-1}
+.top{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.gauge{--p:50;--c:#f59e0b;width:104px;height:104px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),#1f2a44 0);display:grid;place-items:center;flex:none}
+.gauge span{width:80px;height:80px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:30px;font-weight:700}
+.nm{font-size:20px;font-weight:700}
+.price{font-size:26px;font-weight:700;direction:ltr;display:inline-block}
+.mut{color:var(--mut)}
+.pos{color:var(--g)}.neg{color:var(--r)}.neu{color:var(--y)}
+.tag{display:inline-block;border-radius:8px;padding:1px 9px;font-size:13px;border:1px solid var(--line);background:var(--card2);margin:2px 0 2px 4px}
+.tag.g{border-color:#14532d;background:#0f2a1c;color:#86efac}
+.tag.r{border-color:#5b1f2b;background:#2a1218;color:#fca5a5}
+.tag.y{border-color:#5b4510;background:#2a2110;color:#fcd34d}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px}
+td.n{direction:ltr;text-align:left;white-space:nowrap}
+.parts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.part{background:var(--card2);border-radius:12px;padding:8px;text-align:center}
+.part b{display:block;font-size:20px}
+.part small{color:var(--mut)}
+.scale{position:relative;height:46px;margin:14px 6px 6px}
+.scale .bar{position:absolute;top:20px;left:0;right:0;height:6px;border-radius:3px;background:var(--line)}
+.scale .dot{position:absolute;top:15px;width:14px;height:14px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--bg)}
+.scale .tick{position:absolute;top:0;transform:translateX(-50%);font-size:11px;white-space:nowrap;direction:ltr}
+.scale .tick.d{top:30px}
+ul.rs{margin:6px 0 0;padding:0 18px}
+ul.rs li{margin:3px 0}
+.news a{color:var(--txt);text-decoration:none}
+.news a:hover{text-decoration:underline}
+.nrow{padding:7px 0;border-bottom:1px solid var(--line)}
+.nrow small{color:var(--mut)}
+.ch{width:100%;margin-top:6px}
+.ch.t{font-size:12px;color:var(--mut);margin:10px 0 0}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--b)}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+.modal.on{display:flex}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.box label{display:block;font-size:13px;color:var(--mut);margin-top:10px}
+.box input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 10px;font-size:15px;direction:ltr;text-align:left;font-family:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.disc{color:var(--mut);font-size:12px;margin-top:18px;text-align:center}
+[hidden]{display:none!important}
+#top{position:sticky;top:0;z-index:10;background:var(--bg);padding-top:4px}
+.sk{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin-bottom:6px}
+.sk .price{font-size:17px}
+.skr{text-align:left;direction:ltr;flex:none}
+.sc{font-size:28px;font-weight:700;line-height:1}
+.sc small{font-size:13px;color:var(--mut)}
+.skv{font-size:12px;color:var(--mut);direction:rtl;text-align:left}
+#tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;white-space:nowrap;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+#tabs button{background:var(--card);border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:6px 14px;font-size:14px;flex:none}
+#tabs button.on{background:var(--b);border-color:var(--b);color:#fff}
+.pane{display:none;margin-top:6px}
+.pane.on{display:block}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px}
+.mini{background:var(--card2);border-radius:12px;padding:10px}
+.mini small{display:block;color:var(--mut);font-size:12px}
+.mini b{font-size:16px}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.seg button{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:9px 6px;font-size:14px}
+.seg button.on{border-color:var(--b);background:#14223f}
+.seg em{font-style:normal;font-size:11px;background:var(--g);color:#06260f;border-radius:6px;padding:0 6px;margin-inline-start:4px}
+.warn{background:#2a2110;border:1px solid #5b4510;color:#fcd34d;border-radius:10px;padding:6px 10px;margin:6px 0;font-size:13px}
+.fld{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 10px;font-size:15px;font-family:inherit;direction:ltr;text-align:left;text-transform:uppercase}
+.fld.ar{direction:rtl;text-align:right;text-transform:none}
+.row{display:flex;gap:8px;align-items:center}
+.row2g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.win{color:var(--g);font-weight:700}
+tr.click{cursor:pointer}
+tr.click:hover{background:var(--card2)}
+.sm{padding:8px 16px;font-size:14px}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <div class="bg-emerald-600 p-2 rounded-lg text-white font-bold"><i class="fa-solid fa-chart-line"></i></div>
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">Trading & Financial Studio <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">V7 Pro</span></h1>
-                <p class="text-xs text-slate-400">DEMA ATR, VWAP Scalping, EGX Models & Pine v6 Generator</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-3">
-            <button onclick="exportData()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition flex items-center space-x-2">
-                <i class="fa-solid fa-download"></i><span>Export Backup</span>
-            </button>
-            <label class="bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-2 rounded-lg cursor-pointer transition flex items-center space-x-2 font-medium">
-                <i class="fa-solid fa-upload"></i><span>Import Backup</span>
-                <input type="file" id="importFile" class="hidden" onchange="importData(event)">
-            </label>
-        </div>
-    </header>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📈 محلل الأسهم</h1>
+    <button class="ico" id="btnSet">⚙️ الإعدادات</button>
+  </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="bg-slate-900/50 border-b border-slate-800 px-6 flex space-x-6">
-        <button onclick="switchTab('scalping')" id="tab-scalping" class="py-3 px-2 border-b-2 border-emerald-500 text-emerald-400 font-medium text-sm transition flex items-center space-x-2">
-            <i class="fa-solid fa-bolt"></i><span>Scalping Lab (DEMA/ATR)</span>
-        </button>
-        <button onclick="switchTab('egx')" id="tab-egx" class="py-3 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition flex items-center space-x-2">
-            <i class="fa-solid fa-building-columns"></i><span>EGX & Valuation Models</span>
-        </button>
-        <button onclick="switchTab('pinescript')" id="tab-pinescript" class="py-3 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition flex items-center space-x-2">
-            <i class="fa-solid fa-code"></i><span>Pine Script v6 Generator</span>
-        </button>
-        <button onclick="switchTab('journal')" id="tab-journal" class="py-3 px-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition flex items-center space-x-2">
-            <i class="fa-solid fa-book"></i><span>Trade Journal & Portfolio</span>
-        </button>
+  <div class="search">
+    <input id="sym" placeholder="اكتب رمز السهم: AAPL أو COMI.CA" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <button class="go" id="btnGo">حلّل</button>
+  </div>
+  <div class="lbl">أمثلة (اضغط):</div>
+  <div class="chips" id="examples"></div>
+  <div class="lbl">قايمة المتابعة:</div>
+  <div class="chips" id="watch"></div>
+
+  <div id="status"></div>
+  <div id="err" hidden></div>
+
+  <div id="top">
+    <div id="stick" hidden></div>
+    <nav id="tabs">
+      <button data-t="sum" class="on">ملخص</button>
+      <button data-t="val">تقييم</button>
+      <button data-t="tech">فني</button>
+      <button data-t="wy">ويكوف</button>
+      <button data-t="news">أخبار</button>
+      <button data-t="scn">سيناريو</button>
+      <button data-t="chart">شارت</button>
+      <button data-t="bt">باكتست</button>
+      <button data-t="gann">جان وفلك</button>
+      <button data-t="cmp">مقارنة</button>
+      <button data-t="scan">سكانر</button>
     </nav>
+  </div>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
-        
-        <!-- Tab 1: Scalping Lab -->
-        <section id="content-scalping" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Inputs Card -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl">
-                    <h2 class="font-bold text-base flex items-center space-x-2 text-emerald-400">
-                        <i class="fa-solid fa-sliders"></i><span>Scalping Parameters</span>
-                    </h2>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Asset / Symbol</label>
-                        <select id="scalpAsset" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm focus:outline-none focus:border-emerald-500">
-                            <option value="BTCUSDT">Bitcoin (BTCUSDT)</option>
-                            <option value="ETHUSDT">Ethereum (ETHUSDT)</option>
-                            <option value="EGX30">EGX30 Index</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Entry Price ($)</label>
-                        <input type="number" id="entryPrice" value="65000" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">DEMA Period</label>
-                            <input type="number" id="demaPeriod" value="20" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">ATR Multiplier</label>
-                            <input type="number" step="0.1" id="atrMultiplier" value="1.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                        </div>
-                    </div>
-                    <button onclick="calculateScalp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-lg shadow-emerald-900/20">
-                        Run Signal Analysis
-                    </button>
-                </div>
+  <section class="pane on" id="p-sum"><div class="card mut">اكتب رمز سهم واضغط «حلّل» وهتلاقي هنا الملخص.</div></section>
+  <section class="pane" id="p-val"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-tech"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-wy"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-news"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-scn"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-bt"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-gann"><div class="card mut">حلّل سهم الأول.</div></section>
+  <section class="pane" id="p-chart">
+    <div class="card">
+      <h2>الشارت <small>شموع + MA + Donchian + مستويات الدخول والخروج</small></h2>
+      <div id="chMain" class="ch"></div>
+      <div class="ch t">RSI</div><div id="chRsi" class="ch"></div>
+      <div class="ch t">MACD</div><div id="chMacd" class="ch"></div>
+      <div class="ch t">OBV</div><div id="chObv" class="ch"></div>
+    </div>
+  </section>
+  <section class="pane" id="p-cmp">
+    <div class="card">
+      <h2>مقارنة سهمين</h2>
+      <div class="row2g">
+        <div><div class="lbl">السهم الأول</div><input id="cmpA" class="fld" placeholder="AAPL" autocomplete="off" spellcheck="false"></div>
+        <div><div class="lbl">السهم التاني</div><input id="cmpB" class="fld" placeholder="MSFT" autocomplete="off" spellcheck="false"></div>
+      </div>
+      <div style="margin-top:10px"><button class="go sm" id="cmpGo" style="padding:10px 22px">قارن</button></div>
+      <div id="cmpOut" style="margin-top:12px"></div>
+    </div>
+  </section>
+  <section class="pane" id="p-scan">
+    <div class="card">
+      <h2>سكانر قايمة المتابعة <small>بيرتّب الأسهم حسب النتيجة</small></h2>
+      <div class="mut" style="font-size:13px">بيحلّل كل سهم في قايمة المتابعة (تحت البحث) ويرتّبهم من الأقوى للأضعف. الأسهم الكتير بتاخد وقت (حوالي 5–10 ثواني لكل سهم).</div>
+      <div style="margin-top:10px"><button class="go sm" id="scanGo" style="padding:10px 22px">شغّل السكانر</button></div>
+      <div id="scanOut" style="margin-top:12px"></div>
+    </div>
+  </section>
 
-                <!-- Results & Signals -->
-                <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="font-bold text-base flex items-center space-x-2 text-emerald-400">
-                                <i class="fa-solid fa-wave-square"></i><span>Strategy Output & VWAP / DEMA ATR Setup</span>
-                            </h2>
-                            <span id="signalBadge" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">STRONG BUY</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4 mb-6">
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Suggested Stop Loss</span>
-                                <span id="outSL" class="text-lg font-bold text-rose-400">--</span>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Target TP (1:2 Risk/Reward)</span>
-                                <span id="outTP" class="text-lg font-bold text-emerald-400">--</span>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Win Rate Expectancy</span>
-                                <span class="text-lg font-bold text-sky-400">74.2%</span>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            Strategy uses DEMA crossover combined with ATR dynamic bands and VWAP cloud alignment for high-probability short-timeframe scalping on crypto & EGX stocks.
-                        </p>
-                    </div>
-                    <div class="pt-4 border-t border-slate-800 flex justify-end">
-                        <button onclick="saveScalpToJournal()" class="bg-slate-800 hover:bg-slate-700 text-xs px-4 py-2 rounded-lg border border-slate-700 transition flex items-center space-x-2 font-medium">
-                            <i class="fa-solid fa-bookmark text-emerald-400"></i><span>Save Setup to Journal</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
+  <details class="card" style="margin-top:14px">
+    <summary>شرح سريع للمصطلحات</summary>
+    <ul class="rs">
+      <li><b>القيمة العادلة:</b> تقدير لسعر السهم "المنطقي" بناءً على أرباحه وأصوله وتدفقاته. بنحسب أكتر من طريقة ونأخذ الوسيط (median) عشان نقلل خطأ أي طريقة لوحدها.</li>
+      <li><b>Donchian:</b> أعلى قمة وأدنى قاع في آخر N يوم. اختراق القمة = إشارة قوة، وكسر القاع = إشارة ضعف.</li>
+      <li><b>OBV:</b> مجموع الحجم متراكم (بيزيد في أيام الصعود وبيقل في أيام الهبوط). لو بيطلع والسعر ثابت غالبًا في تجميع.</li>
+      <li><b>ويكوف:</b> نظرية بتقسّم حركة السهم إلى: تجميع ← صعود ← تصريف ← هبوط. التقدير هنا آلي وتقريبي.</li>
+      <li><b>SL / TP:</b> وقف الخسارة وهدف الربح. في الشراء SL تحت أقرب دعم، وفي البيع (Short) SL فوق أقرب مقاومة.</li>
+      <li><b>R/R:</b> نسبة الربح المتوقع للمخاطرة. 2 معناها: ربح محتمل ضعف الخسارة المحتملة.</li>
+      <li><b>حجم الصفقة:</b> بنحسبه من رأس المال ونسبة المخاطرة اللي تتحملها (مثلًا 1%) والمسافة لوقف الخسارة.</li>
+    </ul>
+  </details>
+  <div class="disc">أداة تحليل شخصية للمعلومات والتعليم فقط، مش توصية شراء أو بيع. القيم العادلة تقديرات تعتمد على بيانات Yahoo وممكن تكون ناقصة أو متأخرة، خصوصًا للبورصة المصرية.</div>
+</div>
 
-        <!-- Tab 2: EGX & Valuation Models -->
-        <section id="content-egx" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                    <h2 class="font-bold text-base text-emerald-400 flex items-center space-x-2">
-                        <i class="fa-solid fa-calculator"></i><span>Valuation Model (DCF / DDM)</span>
-                    </h2>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Company (EGX)</label>
-                        <select id="egxCompany" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                            <option value="TMG">Talaat Moustafa Group (TMG)</option>
-                            <option value="CIB">Commercial International Bank (CIB)</option>
-                            <option value="EFID">Edita Food Industries (EFID)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Free Cash Flow (EGP Millions)</label>
-                        <input type="number" id="inputFCF" value="4500" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Growth Rate (%)</label>
-                            <input type="number" value="12" id="growthRate" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Discount Rate (%)</label>
-                            <input type="number" value="18" id="discountRate" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                        </div>
-                    </div>
-                    <button onclick="calculateValuation()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg text-sm transition">
-                        Calculate Fair Value
-                    </button>
-                </div>
-                <div class="md:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 flex flex-col justify-between">
-                    <div>
-                        <h2 class="font-bold text-base text-emerald-400 mb-4 flex items-center space-x-2">
-                            <i class="fa-solid fa-chart-pie"></i><span>Fundamental Analysis & Valuation Output</span>
-                        </h2>
-                        <div class="grid grid-cols-3 gap-4 mb-4">
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Intrinsic Fair Value</span>
-                                <span id="fairValue" class="text-xl font-bold text-emerald-400">-- EGP</span>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Current Market Price</span>
-                                <span class="text-xl font-bold text-slate-200">52.40 EGP</span>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                                <span class="text-xs text-slate-400 block">Margin of Safety</span>
-                                <span id="marginSafety" class="text-xl font-bold text-sky-400">--%</span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-                            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Key Financial Metrics Summary</h3>
-                            <p class="text-xs text-slate-400" id="companySummaryText">Select a company and run the model to get automated fundamental valuation and balance sheet strength indexes.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<div class="modal" id="mSet"><div class="box">
+  <h2 style="margin:0 0 4px;font-size:18px">الإعدادات</h2>
+  <label>رابط الـ Worker (من Cloudflare)</label>
+  <input id="sWorker" placeholder="https://xxxx.yyyy.workers.dev">
+  <details open><summary>افتراضات التقييم (تقدر تعدّلها)</summary>
+    <div class="mut" style="font-size:12px">r = معدل الخصم، g نهائي = نمو طويل الأجل، سقف النمو = أقصى نمو نفترضه، سقف PEG = أقصى P/E عادل.</div>
+    <div class="lbl"><b>أمريكا</b></div>
+    <div class="row2">
+      <div><label>r % (خصم)</label><input id="usR" type="number" step="0.5"></div>
+      <div><label>g نهائي %</label><input id="usTg" type="number" step="0.5"></div>
+      <div><label>سقف النمو %</label><input id="usCap" type="number" step="1"></div>
+      <div><label>سقف PEG (P/E)</label><input id="usPeg" type="number" step="1"></div>
+    </div>
+    <div class="lbl"><b>مصر (EGX)</b></div>
+    <div class="row2">
+      <div><label>r % (خصم)</label><input id="egR" type="number" step="0.5"></div>
+      <div><label>g نهائي %</label><input id="egTg" type="number" step="0.5"></div>
+      <div><label>سقف النمو %</label><input id="egCap" type="number" step="1"></div>
+      <div><label>سقف PEG (P/E)</label><input id="egPeg" type="number" step="1"></div>
+    </div>
+  </details>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <button class="go" style="padding:10px 22px" id="sSave">حفظ</button>
+    <button class="ico" id="sReset">رجوع للافتراضي</button>
+    <button class="ico" id="sClose">إغلاق</button>
+  </div>
+</div></div>
 
-        <!-- Tab 3: Pine Script v6 Generator -->
-        <section id="content-pinescript" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                    <h2 class="font-bold text-base text-emerald-400 flex items-center space-x-2">
-                        <i class="fa-solid fa-code"></i><span>Pine Script v6 Indicator Builder</span>
-                    </h2>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Indicator Type</label>
-                        <select id="pineType" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                            <option value="dema_atr">5 Moving Averages + DEMA ATR Cloud</option>
-                            <option value="vwap_smc">VWAP Cloud & SMC Liquidity Swings</option>
-                            <option value="gann">Gann Square & Digital Root Levels</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Plot Styling</label>
-                        <input type="text" id="pineTitle" value="Custom V7 Pro Strategy" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm">
-                    </div>
-                    <button onclick="generatePineCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg text-sm transition">
-                        Generate Pine Script v6 Code
-                    </button>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">TradingView Pine v6 Output</span>
-                        <button onclick="copyPineCode()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 text-emerald-400 font-medium transition">
-                            <i class="fa-solid fa-copy mr-1"></i> Copy Code
-                        </button>
-                    </div>
-                    <pre class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs text-emerald-300 font-mono overflow-x-auto flex-1 h-64" id="pineOutput">//@version=6
-strategy("Custom V7 Pro Strategy", overlay=true)
-// Select your settings and click generate
-</pre>
-                </div>
-            </div>
-        </section>
+<script>
+// ==== CORE START
+const U = {
+  avg: a => a.reduce((x, y) => x + y, 0) / a.length,
+  med: a => { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; },
+  last: a => a[a.length - 1],
+  raw: x => x == null ? null : (typeof x === 'object' ? (x.raw != null ? x.raw : null) : x),
+  clamp: (v, a, b) => Math.min(b, Math.max(a, v)),
+  fmt: (v, d = 2) => (v == null || isNaN(v)) ? '—' : Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }),
+  fp: v => (v == null || isNaN(v)) ? '—' : U.fmt(v, Math.abs(v) < 1 ? 4 : 2),
+  pct: (v, d = 1) => (v == null || isNaN(v)) ? '—' : (v >= 0 ? '+' : '') + (v * 100).toFixed(d) + '%'
+};
+const SECTOR_REF = {
+  'Technology': { pe: 28, pb: 7 }, 'Healthcare': { pe: 22, pb: 4 }, 'Financial Services': { pe: 13, pb: 1.5 },
+  'Consumer Cyclical': { pe: 20, pb: 4 }, 'Consumer Defensive': { pe: 21, pb: 4 }, 'Industrials': { pe: 21, pb: 4 },
+  'Energy': { pe: 12, pb: 1.8 }, 'Utilities': { pe: 17, pb: 1.8 }, 'Real Estate': { pe: 30, pb: 2 },
+  'Basic Materials': { pe: 16, pb: 2.2 }, 'Communication Services': { pe: 19, pb: 3 }, _: { pe: 18, pb: 3 }
+};
+const SECTOR_REF_EGX = { pe: 8, pb: 1.3 };
+const DEF_CFG = {
+  US: { r: 0.10, tg: 0.025, gCap: 0.15, pegCap: 30 },
+  EGX: { r: 0.25, tg: 0.11, gCap: 0.30, pegCap: 12 }
+};
 
-        <!-- Tab 4: Trade Journal & Portfolio -->
-        <section id="content-journal" class="hidden space-y-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="font-bold text-base text-emerald-400 flex items-center space-x-2">
-                        <i class="fa-solid fa-book-bookmark"></i><span>Saved Setups & Journal</span>
-                    </h2>
-                    <button onclick="clearJournal()" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Clear All</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Asset</th>
-                                <th class="p-3">Entry Price</th>
-                                <th class="p-3">Stop Loss</th>
-                                <th class="p-3">Target TP</th>
-                                <th class="p-3">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody id="journalTableBody" class="divide-y divide-slate-800">
-                            <tr>
-                                <td colspan="5" class="p-4 text-center text-slate-500">No saved setups yet. Use the Scalping Lab to save setups.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+// ---------- indicators ----------
+function SMA(a, n) {
+  const out = Array(a.length).fill(null); let s = 0;
+  for (let i = 0; i < a.length; i++) { s += a[i]; if (i >= n) s -= a[i - n]; if (i >= n - 1) out[i] = s / n; }
+  return out;
+}
+function EMA(a, n) {
+  const out = Array(a.length).fill(null); const k = 2 / (n + 1);
+  const st = a.findIndex(v => v != null);
+  if (st < 0 || a.length - st < n) return out;
+  let s = 0; for (let i = st; i < st + n; i++) s += a[i];
+  let prev = s / n; out[st + n - 1] = prev;
+  for (let i = st + n; i < a.length; i++) { prev = a[i] * k + prev * (1 - k); out[i] = prev; }
+  return out;
+}
+function RSI(c, n = 14) {
+  const out = Array(c.length).fill(null); if (c.length <= n) return out;
+  let g = 0, l = 0;
+  for (let i = 1; i <= n; i++) { const d = c[i] - c[i - 1]; if (d >= 0) g += d; else l -= d; }
+  g /= n; l /= n; out[n] = l === 0 ? 100 : 100 - 100 / (1 + g / l);
+  for (let i = n + 1; i < c.length; i++) {
+    const d = c[i] - c[i - 1];
+    g = (g * (n - 1) + (d > 0 ? d : 0)) / n; l = (l * (n - 1) + (d < 0 ? -d : 0)) / n;
+    out[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l);
+  }
+  return out;
+}
+function ATR(h, l, c, n = 14) {
+  const tr = h.map((_, i) => i === 0 ? h[i] - l[i] : Math.max(h[i] - l[i], Math.abs(h[i] - c[i - 1]), Math.abs(l[i] - c[i - 1])));
+  const out = Array(c.length).fill(null); if (c.length <= n) return out;
+  let a = U.avg(tr.slice(1, n + 1)); out[n] = a;
+  for (let i = n + 1; i < c.length; i++) { a = (a * (n - 1) + tr[i]) / n; out[i] = a; }
+  return out;
+}
+function MACD(c, f = 12, s = 26, sg = 9) {
+  const ef = EMA(c, f), es = EMA(c, s);
+  const line = c.map((_, i) => ef[i] != null && es[i] != null ? ef[i] - es[i] : null);
+  const sig = EMA(line, sg);
+  const hist = line.map((v, i) => v != null && sig[i] != null ? v - sig[i] : null);
+  return { line, sig, hist };
+}
+function OBV(c, v) {
+  const out = [0];
+  for (let i = 1; i < c.length; i++) out.push(out[i - 1] + (c[i] > c[i - 1] ? v[i] : c[i] < c[i - 1] ? -v[i] : 0));
+  return out;
+}
+function Donchian(h, l, n) {
+  const up = [], lo = [];
+  for (let i = 0; i < h.length; i++) {
+    if (i < n - 1) { up.push(null); lo.push(null); continue; }
+    let mx = -Infinity, mn = Infinity;
+    for (let j = i - n + 1; j <= i; j++) { if (h[j] > mx) mx = h[j]; if (l[j] < mn) mn = l[j]; }
+    up.push(mx); lo.push(mn);
+  }
+  return { up, lo };
+}
+function lastCross(a, b, look = 30) {
+  const n = a.length;
+  for (let i = n - 1; i > n - 1 - look && i > 0; i--) {
+    if (a[i] == null || b[i] == null || a[i - 1] == null || b[i - 1] == null) continue;
+    const s1 = a[i - 1] - b[i - 1], s2 = a[i] - b[i];
+    if (s1 <= 0 && s2 > 0) return { type: 'up', ago: n - 1 - i };
+    if (s1 >= 0 && s2 < 0) return { type: 'down', ago: n - 1 - i };
+  }
+  return null;
+}
+function pivots(h, l, w = 5, look = 260) {
+  const n = h.length, from = Math.max(w, n - look), res = { hi: [], lo: [] };
+  for (let i = from; i < n - w; i++) {
+    let isH = true, isL = true;
+    for (let j = i - w; j <= i + w; j++) { if (h[j] > h[i]) isH = false; if (l[j] < l[i]) isL = false; }
+    if (isH) res.hi.push(h[i]);
+    if (isL) res.lo.push(l[i]);
+  }
+  return res;
+}
+function cluster(vals, tol) {
+  const s = [...vals].sort((a, b) => a - b), out = [];
+  for (const v of s) {
+    const c = out[out.length - 1];
+    if (c && Math.abs(v - c.mean) / c.mean <= tol) { c.n++; c.sum += v; c.mean = c.sum / c.n; }
+    else out.push({ n: 1, sum: v, mean: v });
+  }
+  return out.map(c => ({ price: c.mean, touches: c.n }));
+}
 
-    </main>
+// ---------- data ----------
+function parseChart(js) {
+  const r = js && js.chart && js.chart.result && js.chart.result[0];
+  if (!r || !r.timestamp || !r.indicators || !r.indicators.quote) return null;
+  const q = r.indicators.quote[0]; const off = (r.meta && r.meta.gmtoffset) || 0;
+  const map = new Map();
+  for (let i = 0; i < r.timestamp.length; i++) {
+    const o = q.open[i], h = q.high[i], l = q.low[i], c = q.close[i];
+    if ([o, h, l, c].some(x => x == null || !isFinite(x))) continue;
+    const date = new Date((r.timestamp[i] + off) * 1000).toISOString().slice(0, 10);
+    map.set(date, { date, o, h, l, c, v: q.volume[i] || 0 });
+  }
+  const arr = [...map.values()].sort((a, b) => a.date < b.date ? -1 : 1);
+  if (arr.length < 40) return null;
+  return { meta: r.meta || {}, dates: arr.map(x => x.date), o: arr.map(x => x.o), h: arr.map(x => x.h), l: arr.map(x => x.l), c: arr.map(x => x.c), v: arr.map(x => x.v) };
+}
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
-        Trading & Financial Studio V7 Pro — Persistent LocalStorage Enabled. Ready for GitHub Pages / Netlify deployment.
-    </footer>
+// ---------- technicals ----------
+function technicals(d) {
+  const { h, l, c, v } = d; const n = c.length; const price = c[n - 1];
+  const ind = {
+    sma20: SMA(c, 20), sma50: SMA(c, 50), sma100: SMA(c, 100), sma200: SMA(c, 200),
+    rsi: RSI(c, 14), atr: ATR(h, l, c, 14), macd: MACD(c), obv: OBV(c, v),
+    dc20: Donchian(h, l, 20), dc55: Donchian(h, l, 55), dc10: Donchian(h, l, 10)
+  };
+  const L = a => a[n - 1];
+  const m20 = L(ind.sma20), m50 = L(ind.sma50), m100 = L(ind.sma100), m200 = L(ind.sma200), rsi = L(ind.rsi);
+  const atr = L(ind.atr) || price * 0.02;
+  const mac = L(ind.macd.line), sig = L(ind.macd.sig), hist = L(ind.macd.hist), histPrev = ind.macd.hist[n - 2];
+  const S = []; const add = (name, val, w, text) => S.push({ name, v: val, w, text });
+  const f = U.fp;
+  const crosses = [];
 
-    <!-- JavaScript Application Logic -->
-    <script>
-        function switchTab(tabId) {
-            ['scalping', 'egx', 'pinescript', 'journal'].forEach(t => {
-                document.getElementById(`content-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('border-emerald-500', 'text-emerald-400');
-                document.getElementById(`tab-${t}`).classList.add('border-transparent', 'text-slate-400');
-            });
-            document.getElementById(`content-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}`).classList.add('border-emerald-500', 'text-emerald-400');
-            document.getElementById(`tab-${tabId}`).classList.remove('border-transparent', 'text-slate-400');
-        }
+  if (m200 != null) add('السعر مقابل MA200', price > m200 ? 1 : -1, 3, price > m200 ? `السعر فوق متوسط 200 يوم (${f(m200)}) ← الاتجاه الطويل صاعد` : `السعر تحت متوسط 200 يوم (${f(m200)}) ← الاتجاه الطويل هابط`);
+  if (m50 != null) add('السعر مقابل MA50', price > m50 ? 1 : -1, 2, price > m50 ? `السعر فوق متوسط 50 يوم (${f(m50)})` : `السعر تحت متوسط 50 يوم (${f(m50)})`);
+  if (m50 != null && m200 != null) {
+    const cr = lastCross(ind.sma50, ind.sma200, 60);
+    let tx = m50 > m200 ? 'MA50 فوق MA200 (حالة Golden)' : 'MA50 تحت MA200 (حالة Death)';
+    if (cr) { tx += cr.type === 'up' ? ` — تقاطع صاعد (Golden Cross) من ${cr.ago} يوم` : ` — تقاطع هابط (Death Cross) من ${cr.ago} يوم`; crosses.push({ pair: '50/200', ...cr }); }
+    add('تقاطع MA50 / MA200', m50 > m200 ? 1 : -1, 2, tx);
+  }
+  if (m20 != null && m50 != null) {
+    const cr = lastCross(ind.sma20, ind.sma50, 15);
+    let tx = m20 > m50 ? 'MA20 فوق MA50' : 'MA20 تحت MA50';
+    if (cr) { tx += cr.type === 'up' ? ` — تقاطع صاعد من ${cr.ago} يوم` : ` — تقاطع هابط من ${cr.ago} يوم`; crosses.push({ pair: '20/50', ...cr }); }
+    add('تقاطع MA20 / MA50', m20 > m50 ? 1 : -1, 1.5, tx);
+  }
+  if (mac != null && sig != null) {
+    add('MACD (خط vs إشارة)', mac > sig ? 1 : -1, 2, mac > sig ? 'خط MACD فوق خط الإشارة ← زخم إيجابي' : 'خط MACD تحت خط الإشارة ← زخم سلبي');
+    if (hist != null && histPrev != null) add('MACD هيستوجرام', hist > histPrev ? 1 : -1, 1, hist > histPrev ? 'الهيستوجرام بيزيد (الزخم بيقوى)' : 'الهيستوجرام بيقل (الزخم بيضعف)');
+    add('MACD مقابل الصفر', mac > 0 ? 1 : -1, 1, mac > 0 ? 'MACD فوق الصفر' : 'MACD تحت الصفر');
+  }
+  if (rsi != null) {
+    let val, tx;
+    if (rsi >= 80) { val = -1; tx = `RSI ${rsi.toFixed(0)} تشبّع شرائي شديد ← احتمال تصحيح`; }
+    else if (rsi >= 70) { val = 0; tx = `RSI ${rsi.toFixed(0)} قوي لكن داخل منطقة التشبّع الشرائي`; }
+    else if (rsi >= 55) { val = 1; tx = `RSI ${rsi.toFixed(0)} منطقة قوة صحية`; }
+    else if (rsi >= 45) { val = 0; tx = `RSI ${rsi.toFixed(0)} منطقة محايدة`; }
+    else if (rsi >= 30) { val = -1; tx = `RSI ${rsi.toFixed(0)} ضعف في الزخم`; }
+    else { val = 0; tx = `RSI ${rsi.toFixed(0)} تشبّع بيعي ← ممكن ارتداد لكن مش مؤكد`; }
+    add('RSI (14)', val, 1.5, tx);
+  }
+  // OBV
+  let obvChg = null, pChg20 = null;
+  if (n > 25) {
+    obvChg = ind.obv[n - 1] - ind.obv[n - 21]; pChg20 = c[n - 1] / c[n - 21] - 1;
+    let val, tx;
+    if (obvChg > 0 && pChg20 >= 0) { val = 1; tx = 'OBV بيطلع مع السعر ← الصعود مدعوم بحجم'; }
+    else if (obvChg > 0 && pChg20 < 0) { val = 1; tx = 'Divergence إيجابي: السعر نازل لكن OBV طالع ← احتمال تجميع'; }
+    else if (obvChg < 0 && pChg20 > 0) { val = -1; tx = 'Divergence سلبي: السعر طالع لكن OBV نازل ← احتمال تصريف'; }
+    else { val = -1; tx = 'OBV نازل مع السعر ← ضغط بيع بحجم'; }
+    add('OBV (آخر 20 يوم)', val, 2, tx);
+  }
+  // Volume
+  const avg20 = U.avg(v.slice(-20)), avg50 = U.avg(v.slice(-50));
+  const vToday = v[n - 1]; const volRatio = avg20 ? vToday / avg20 : null;
+  let upV = 0, dnV = 0;
+  for (let i = n - 20; i < n; i++) { if (i < 1) continue; if (c[i] > c[i - 1]) upV += v[i]; else if (c[i] < c[i - 1]) dnV += v[i]; }
+  const udr = dnV ? upV / dnV : 1;
+  {
+    let val = 0, tx = `حجم أيام الصعود ÷ أيام الهبوط (20 يوم) = ${udr.toFixed(2)}`;
+    if (udr > 1.2) { val = 1; tx += ' ← السيولة داخلة'; } else if (udr < 0.8) { val = -1; tx += ' ← السيولة خارجة'; } else tx += ' ← متوازن';
+    if (volRatio != null) tx += ` | حجم آخر يوم ${volRatio.toFixed(1)}× متوسط 20 يوم`;
+    add('الحجم (Volume)', val, 1.5, tx);
+  }
+  // Donchian
+  const dU = ind.dc20.up[n - 2], dL = ind.dc20.lo[n - 2];
+  const dUc = L(ind.dc20.up), dLc = L(ind.dc20.lo);
+  let dcPos = null;
+  if (dUc != null) {
+    dcPos = (price - dLc) / ((dUc - dLc) || 1);
+    if (dU != null && price > dU) add('Donchian 20', 1, 2.5, `اختراق أعلى قمة 20 يوم (${f(dU)}) ← إشارة قوة/دخول Turtle`);
+    else if (dL != null && price < dL) add('Donchian 20', -1, 2.5, `كسر أدنى قاع 20 يوم (${f(dL)}) ← إشارة ضعف`);
+    else add('Donchian 20', dcPos > 0.7 ? 1 : dcPos < 0.3 ? -1 : 0, 1.5, `السعر في ${(dcPos * 100).toFixed(0)}% من قناة 20 يوم (${f(dLc)} – ${f(dUc)})`);
+  }
+  let sw = 0, sv = 0; S.forEach(s => { sw += s.w; sv += s.v * s.w; });
+  const score = sw ? 50 + 50 * sv / sw : 50;
+  const st = {
+    price, m20, m50, m100, m200, rsi, macd: mac, sig, hist, atr, atrPct: atr / price,
+    obvChg, pChg20, avg20, avg50, vToday, volRatio, udr,
+    dc20: { up: dUc, lo: dLc, mid: dUc != null ? (dUc + dLc) / 2 : null, pos: dcPos },
+    dc55: { up: L(ind.dc55.up), lo: L(ind.dc55.lo) },
+    trail10: L(ind.dc10.lo), trail10hi: L(ind.dc10.up), crosses
+  };
+  const pos = S.filter(s => s.v > 0).length, neg = S.filter(s => s.v < 0).length;
+  return { ind, signals: S, score, st, pos, neg };
+}
 
-        function calculateScalp() {
-            let entry = parseFloat(document.getElementById('entryPrice').value) || 0;
-            let mult = parseFloat(document.getElementById('atrMultiplier').value) || 1.5;
-            let sl = entry - (mult * 250);
-            let tp = entry + (mult * 500);
+function buildLevels(d, t) {
+  const { h, l, c } = d; const n = c.length; const price = c[n - 1]; const raw = [];
+  const pv = pivots(h, l, 5, 260);
+  for (const k of cluster([...pv.hi, ...pv.lo], 0.015)) raw.push({ price: k.price, src: 'قمة/قاع سابق ×' + k.touches, w: Math.min(k.touches, 4) });
+  const look = Math.min(252, n);
+  const hs = h.slice(-look), ls = l.slice(-look);
+  const H = Math.max(...hs), Lw = Math.min(...ls);
+  const iH = hs.lastIndexOf(H), iL = ls.lastIndexOf(Lw);
+  raw.push({ price: H, src: 'قمة 52 أسبوع', w: 2 }, { price: Lw, src: 'قاع 52 أسبوع', w: 2 });
+  const upTrend = iH > iL; const fibs = [];
+  for (const r of [0.236, 0.382, 0.5, 0.618, 0.786]) {
+    const p = upTrend ? H - (H - Lw) * r : Lw + (H - Lw) * r;
+    fibs.push({ r, price: p }); raw.push({ price: p, src: 'فيبوناتشي ' + (r * 100).toFixed(1) + '%', w: 1 });
+  }
+  const s = t.st;
+  if (s.m200) raw.push({ price: s.m200, src: 'MA200', w: 2 });
+  if (s.m50) raw.push({ price: s.m50, src: 'MA50', w: 1.5 });
+  if (s.dc55.up) raw.push({ price: s.dc55.up, src: 'Donchian 55 أعلى', w: 2 }, { price: s.dc55.lo, src: 'Donchian 55 أدنى', w: 2 });
+  raw.sort((a, b) => a.price - b.price);
+  const merged = [];
+  for (const x of raw) {
+    const m = merged[merged.length - 1];
+    if (m && Math.abs(x.price - m.price) / price <= 0.008) {
+      m.price = (m.price * m.w + x.price * x.w) / (m.w + x.w); m.w += x.w; m.src += ' + ' + x.src;
+    } else merged.push({ ...x });
+  }
+  const supports = merged.filter(x => x.price < price * 0.995).sort((a, b) => b.price - a.price);
+  const resistances = merged.filter(x => x.price > price * 1.005).sort((a, b) => a.price - b.price);
+  return { supports, resistances, fibs, H, L: Lw, upTrend };
+}
 
-            document.getElementById('outSL').innerText = sl.toFixed(2);
-            document.getElementById('outTP').innerText = tp.toFixed(2);
-        }
+function tradePlan(price, atr, lv) {
+  const minD = 0.8 * atr; const notes = {};
+  const s = lv.supports.find(x => x.price <= price - minD && x.w >= 2) || lv.supports.find(x => x.price <= price - minD);
+  let sl, slNote;
+  if (s) { sl = s.price - 0.4 * atr; slNote = 'تحت أقرب دعم (' + s.src.split(' + ')[0] + ') بمسافة أمان 0.4 ATR'; }
+  else { sl = price - 2 * atr; slNote = 'بدون دعم قريب: 2 × ATR تحت السعر'; }
+  if (price - sl > 3.5 * atr) { sl = price - 3 * atr; slNote = 'الدعم بعيد: تم تحديد الخسارة بـ 3 × ATR'; }
+  if (price - sl < 1 * atr) { sl = price - 1 * atr; slNote = 'الحد الأدنى للمسافة: 1 × ATR'; }
+  const risk = price - sl;
+  const rs = lv.resistances.filter(x => x.price >= price + 1 * atr);
+  let tp1, tp1Note, tp2, tp2Note;
+  if (rs.length) {
+    tp1 = rs[0].price; tp1Note = 'أقرب مقاومة (' + rs[0].src.split(' + ')[0] + ')';
+    const r2 = rs.find(x => x.price > tp1 + 0.5 * atr);
+    if (r2) { tp2 = r2.price; tp2Note = 'المقاومة التالية (' + r2.src.split(' + ')[0] + ')'; }
+    else { tp2 = price + 3 * risk; tp2Note = 'مفيش مقاومة تانية: 3 × المخاطرة'; }
+  } else {
+    tp1 = price + 1.5 * risk; tp1Note = 'مفيش مقاومة قريبة: 1.5 × المخاطرة';
+    tp2 = price + 2.5 * risk; tp2Note = '2.5 × المخاطرة';
+  }
+  const rr1 = (tp1 - price) / risk, rr2 = (tp2 - price) / risk;
+  return { sl, slNote, risk, riskPct: risk / price, tp1, tp1Note, tp2, tp2Note, rr1, rr2, tp1Pct: tp1 / price - 1, tp2Pct: tp2 / price - 1 };
+}
 
-        function calculateValuation() {
-            let fcf = parseFloat(document.getElementById('inputFCF').value) || 4500;
-            let g = parseFloat(document.getElementById('growthRate').value) / 100 || 0.12;
-            let r = parseFloat(document.getElementById('discountRate').value) / 100 || 0.18;
-            
-            let fair = (fcf * (1 + g)) / (r - g);
-            document.getElementById('fairValue').innerText = fair.toFixed(1) + ' EGP';
-            let margin = ((fair - 52.4) / fair) * 100;
-            document.getElementById('marginSafety').innerText = margin.toFixed(1) + '%';
-            document.getElementById('companySummaryText').innerText = "Model successfully evaluated based on discounted cash flow projections. High financial stability score.";
-        }
+// ---------- Wyckoff ----------
+function wyckoff(d, t) {
+  const { h, l, c, v } = d, ind = t.ind, n = c.length, price = c[n - 1], W = 60, f = U.fp;
+  if (n < W + 25) return { key: 'na', title: 'بيانات غير كافية', stage: 'محتاج ~100 يوم تداول على الأقل', sub: '', reasons: [], conf: '—', score: 50, range: null };
+  const m50 = t.st.m50, m200 = t.st.m200;
+  const m50p = ind.sma50[n - 21]; const slope50 = (m50 && m50p) ? m50 / m50p - 1 : 0;
+  const rng = end => {
+    const s = end - W + 1; let hi = -Infinity, lo = Infinity;
+    for (let i = s; i <= end; i++) { if (h[i] > hi) hi = h[i]; if (l[i] < lo) lo = l[i]; }
+    const a = ind.atr[end] || t.st.atr;
+    return { hi, lo, eff: Math.abs(c[end] - c[s]) / ((hi - lo) || 1), wAtr: (hi - lo) / a };
+  };
+  const isR = r => r.eff < 0.5 && r.wAtr < 9.5;
+  const cur = rng(n - 1), old = rng(n - 11);
+  const prior = c[n - W] / c[Math.max(0, n - 2 * W)] - 1;
+  let upV = 0, dnV = 0;
+  for (let i = n - W; i < n; i++) { if (c[i] > c[i - 1]) upV += v[i]; else if (c[i] < c[i - 1]) dnV += v[i]; }
+  const vr = dnV ? upV / dnV : 1;
+  let baseLo = Infinity, baseHi = -Infinity;
+  for (let i = n - W; i < n - 20; i++) { baseLo = Math.min(baseLo, l[i]); baseHi = Math.max(baseHi, h[i]); }
+  let spring = false, ut = false;
+  for (let i = n - 20; i < n; i++) {
+    if (l[i] < baseLo * 0.998 && c[i] > baseLo) spring = true;
+    if (h[i] > baseHi * 1.002 && c[i] < baseHi) ut = true;
+  }
+  const R = []; let key, title, sub = '', score = 50, ev = 0, range = null;
+  const has200 = m200 != null;
+  if (isR(old) && price > old.hi * 1.005 && !isR(cur)) {
+    key = 'markup'; title = 'بداية صعود (Markup)'; sub = 'Phase E — اختراق نطاق التجميع لأعلى'; score = 82; ev = 2; range = { hi: old.hi, lo: old.lo };
+    R.push(`كان فيه نطاق عرضي (${f(old.lo)} – ${f(old.hi)}) والسعر اخترقه لأعلى`);
+  } else if (isR(old) && price < old.lo * 0.995 && !isR(cur)) {
+    key = 'markdown'; title = 'كسر النطاق (بداية هبوط)'; sub = 'Phase E — كسر نطاق التصريف لأسفل'; score = 14; ev = 2; range = { hi: old.hi, lo: old.lo };
+    R.push(`كان فيه نطاق عرضي (${f(old.lo)} – ${f(old.hi)}) والسعر كسره لأسفل`);
+  } else if (isR(cur)) {
+    range = { hi: cur.hi, lo: cur.lo };
+    const pos = (price - cur.lo) / ((cur.hi - cur.lo) || 1);
+    const bias = prior < -0.08 ? 'down' : prior > 0.08 ? 'up' : (has200 ? (price < m200 ? 'down' : 'up') : 'flat');
+    R.push(`السعر في نطاق عرضي ~60 يوم بين ${f(cur.lo)} و ${f(cur.hi)} (عرضه ≈ ${cur.wAtr.toFixed(1)}×ATR)، والسعر في ${(pos * 100).toFixed(0)}% منه`);
+    R.push(`الحركة قبل النطاق: ${(prior * 100).toFixed(0)}% ← ${bias === 'down' ? 'اتجاه هابط سابق (مناسب لتجميع)' : 'اتجاه صاعد سابق (مناسب لتصريف أو استراحة)'}`);
+    R.push(`حجم الصعود ÷ حجم الهبوط جوه النطاق = ${vr.toFixed(2)} ← ${vr > 1.1 ? 'ضغط شراء' : vr < 0.9 ? 'ضغط بيع' : 'متوازن'}`);
+    if (bias === 'down') {
+      if (spring) { key = 'accumulation'; title = 'تجميع (Accumulation)'; sub = 'Phase C — Spring: كسر مؤقت لقاع النطاق ورجوع سريع'; score = 78; ev += 2; R.push('اتسجّل Spring: قاع النطاق اتكسر والإغلاق رجع فوقه (فخ للبائعين)'); }
+      else if (vr > 1.1) { key = 'accumulation'; title = 'تجميع (Accumulation)'; sub = pos > 0.65 ? 'Phase D — السعر قرّب أعلى النطاق (علامات قوة SOS)' : 'Phase B — بناء السبب جوه النطاق'; score = pos > 0.65 ? 74 : 66; ev += 1; }
+      else if (vr < 0.9) { key = 'range'; title = 'نطاق بعد هبوط (غير محسوم)'; sub = 'البيع لسه مسيطر، التجميع مش مؤكد'; score = 38; }
+      else { key = 'accumulation'; title = 'تجميع محتمل'; sub = 'Phase A/B — لسه بدري'; score = 55; }
+    } else if (bias === 'up') {
+      if (ut) { key = 'distribution'; title = 'تصريف (Distribution)'; sub = 'Phase C — UT: اختراق كاذب لقمة النطاق ورجوع تحتها'; score = 22; ev += 2; R.push('اتسجّل Upthrust: قمة النطاق اتخترقت والإغلاق رجع تحتها (فخ للمشترين)'); }
+      else if (vr < 0.9) { key = 'distribution'; title = 'تصريف (Distribution)'; sub = pos < 0.35 ? 'Phase D — ضعف وقرب كسر النطاق' : 'Phase B — بيع تدريجي جوه النطاق'; score = pos < 0.35 ? 18 : 28; ev += 1; }
+      else if (vr > 1.1) { key = 'reaccum'; title = 'إعادة تجميع (Re-accumulation)'; sub = 'استراحة جوه ترند صاعد'; score = 72; ev += 1; }
+      else { key = 'range'; title = 'نطاق بعد صعود (غير محسوم)'; sub = 'مفيش دليل حجم كافي لتجميع أو تصريف'; score = 50; }
+    } else { key = 'range'; title = 'نطاق عرضي (غير محسوم)'; score = 50; }
+    if (vr > 1.3 || vr < 0.75) ev += 1;
+  } else {
+    const up = has200 ? (price > m50 && m50 > m200 && slope50 > 0) : (m50 && price > m50 && slope50 > 0);
+    const dn = has200 ? (price < m50 && m50 < m200 && slope50 < 0) : (m50 && price < m50 && slope50 < 0);
+    if (up) {
+      key = 'markup'; title = 'صعود (Markup)'; sub = 'الترند الصاعد شغّال'; score = 85; ev = 2;
+      R.push('السعر فوق MA50 وMA50 فوق MA200 وميل MA50 لأعلى');
+      if (t.st.rsi > 75) { sub = 'صعود متقدّم — RSI عالي، خلي بالك من تصريف قريب'; score = 70; R.push(`RSI ${t.st.rsi.toFixed(0)} تشبّع شرائي`); }
+    } else if (dn) {
+      key = 'markdown'; title = 'هبوط (Markdown)'; sub = 'الترند الهابط شغّال'; score = 10; ev = 2;
+      R.push('السعر تحت MA50 وMA50 تحت MA200 وميل MA50 لأسفل');
+    } else {
+      key = 'transition'; title = 'مرحلة انتقالية'; sub = 'المتوسطات مش متوافقة — الاتجاه بيتغيّر أو مش واضح'; score = 50;
+      R.push('مفيش ترتيب واضح بين السعر وMA50 وMA200 ومفيش نطاق عرضي محدد');
+    }
+  }
+  const stageMap = {
+    accumulation: 'مرحلة تجميع (المؤسسات بتشتري بهدوء)', reaccum: 'استراحة جوه ترند صاعد (إعادة تجميع)', markup: 'مرحلة صعود',
+    distribution: 'مرحلة تصريف (بيع تدريجي عند القمم)', markdown: 'مرحلة هبوط', range: 'غير محسوم', transition: 'غير محسوم', na: '—'
+  };
+  return { key, title, stage: stageMap[key], sub, reasons: R, conf: ev >= 3 ? 'عالية' : ev >= 2 ? 'متوسطة' : 'منخفضة', score, range };
+}
 
-        function generatePineCode() {
-            let type = document.getElementById('pineType').value;
-            let title = document.getElementById('pineTitle').value;
-            let code = `//@version=6\nstrategy("${title}", overlay=true)\n\n// --- V7 Pro Generated Indicator ---\n`;
-            if(type === 'dema_atr') {
-                code += `dema20 = ta.ema(ta.ema(close, 20), 20)\natrVal = ta.atr(14)\nupperBand = dema20 + (atrVal * 1.5)\nlowerBand = dema20 - (atrVal * 1.5)\n\nplot(dema20, color=color.blue, title="DEMA 20")\nplot(upperBand, color=color.green, title="Upper ATR")\nplot(lowerBand, color=color.red, title="Lower ATR")\n\nlongCondition = ta.crossover(close, lowerBand)\nif (longCondition)\n    strategy.entry("DEMA Scalp Long", strategy.long)\n`;
-            } else if(type === 'vwap_smc') {
-                code += `v = ta.vwap\nplot(v, color=color.purple, title="Session VWAP")\n// SMC Liquidity Swings Logic\nhtfHigh = request.security(syminfo.tickerid, "D", high[1])\nplot(htfHigh, color=color.orange, style=plot.style_circles, title="Daily High Liquidity")\n`;
-            } else {
-                code += `// Gann Square & Digital Root Levels\nbasePrice = close\ndigitalRoot = math.round(basePrice % 9)\nplotchar(true, title="Digital Root Level", char=str.tostring(digitalRoot))\n`;
-            }
-            document.getElementById('pineOutput').innerText = code;
-        }
+// ---------- fundamentals & valuation ----------
+function extractFund(sm) {
+  const r = U.raw; const res = sm && sm.quoteSummary && sm.quoteSummary.result && sm.quoteSummary.result[0];
+  if (!res) return null;
+  const P = res.price || {}, SD = res.summaryDetail || {}, KS = res.defaultKeyStatistics || {}, FD = res.financialData || {}, AP = res.assetProfile || {};
+  return {
+    name: P.longName || P.shortName || null, priceCur: P.currency || null, finCur: FD.financialCurrency || null,
+    pe: r(SD.trailingPE), fpe: r(SD.forwardPE) || r(KS.forwardPE), pb: r(KS.priceToBook),
+    eps: r(KS.trailingEps), feps: r(KS.forwardEps), bvps: r(KS.bookValue), shares: r(KS.sharesOutstanding) || r(KS.impliedSharesOutstanding),
+    dps: r(SD.dividendRate), dyield: r(SD.dividendYield), fcf: r(FD.freeCashflow), cash: r(FD.totalCash), debt: r(FD.totalDebt),
+    revG: r(FD.revenueGrowth), earnG: r(FD.earningsGrowth), roe: r(FD.returnOnEquity), margin: r(FD.profitMargins),
+    target: r(FD.targetMeanPrice), analysts: r(FD.numberOfAnalystOpinions), rec: FD.recommendationKey || null,
+    de: r(FD.debtToEquity), cr: r(FD.currentRatio),
+    sector: AP.sector || null, industry: AP.industry || null, cap: r(SD.marketCap) || r(P.marketCap)
+  };
+}
+function peerStats(quotes, self, sector, market) {
+  const vals = (quotes || []).filter(q => q && q.symbol !== self);
+  const pes = vals.map(q => q.trailingPE).filter(x => x > 0 && x < 80);
+  const pbs = vals.map(q => q.priceToBook).filter(x => x > 0 && x < 30);
+  const out = { peers: vals.map(q => ({ symbol: q.symbol, name: q.shortName || q.longName || q.symbol, pe: q.trailingPE || null, pb: q.priceToBook || null })), pe: null, pb: null, srcPE: null, srcPB: null };
+  const ref = market === 'EGX' ? SECTOR_REF_EGX : (SECTOR_REF[sector] || SECTOR_REF._);
+  if (pes.length >= 3) { out.pe = U.med(pes); out.srcPE = 'peers'; } else { out.pe = ref.pe; out.srcPE = 'ref'; }
+  if (pbs.length >= 3) { out.pb = U.med(pbs); out.srcPB = 'peers'; } else { out.pb = ref.pb; out.srcPB = 'ref'; }
+  return out;
+}
+function verdictOf(up) {
+  if (up == null) return { label: 'غير متاح', color: 'y' };
+  if (up >= 0.30) return { label: 'رخيص جدًا', color: 'g' };
+  if (up >= 0.10) return { label: 'رخيص', color: 'g' };
+  if (up > -0.10) return { label: 'سعره عادل', color: 'y' };
+  if (up > -0.30) return { label: 'غالي', color: 'r' };
+  return { label: 'غالي جدًا', color: 'r' };
+}
+function valuation(price, f, ps, cfg) {
+  if (!f) return null;
+  const M = []; const curOK = !f.finCur || !f.priceCur || f.finCur === f.priceCur;
+  const fin = /financial/i.test(f.sector || '');
+  const gs = [f.earnG, f.revG].filter(x => x != null && isFinite(x));
+  const gRaw = gs.length ? Math.min(...gs) : null;
+  const g = gRaw == null ? null : U.clamp(gRaw, 0, cfg.gCap);
+  const add = (key, name, value, note) => M.push({ key, name, value: (value != null && isFinite(value) && value > 0) ? value : null, note });
 
-        function copyPineCode() {
-            let text = document.getElementById('pineOutput').innerText;
-            navigator.clipboard.writeText(text);
-            alert('Pine Script v6 copied to clipboard!');
-        }
+  if (curOK && f.eps > 0 && f.bvps > 0) add('graham', 'Graham Number', Math.sqrt(22.5 * f.eps * f.bvps), '√(22.5 × ربحية السهم × القيمة الدفترية)');
+  else add('graham', 'Graham Number', null, 'محتاج ربحية سهم وقيمة دفترية موجبين' + (curOK ? '' : ' (عملة القوائم مختلفة)'));
 
-        // Journal & Persistent Storage
-        let journalData = JSON.parse(localStorage.getItem('v7_journal')) || [];
+  if (!fin && curOK && f.fcf > 0) {
+    const shares = f.shares || (f.cap && price ? f.cap / price : null);
+    const g0 = g != null ? g : cfg.tg; let pv = 0, fc = f.fcf;
+    for (let t = 1; t <= 5; t++) { const gt = g0 + (cfg.tg - g0) * (t - 1) / 4; fc *= 1 + gt; pv += fc / Math.pow(1 + cfg.r, t); }
+    if (shares > 0 && cfg.r > cfg.tg + 0.01) {
+      const tv = fc * (1 + cfg.tg) / (cfg.r - cfg.tg) / Math.pow(1 + cfg.r, 5);
+      const eq = pv + tv + (f.cash || 0) - (f.debt || 0);
+      add('dcf', 'DCF (التدفق النقدي الحر)', eq / shares, `نمو ${(g0 * 100).toFixed(0)}% بيتناقص لـ ${(cfg.tg * 100).toFixed(1)}% | خصم ${(cfg.r * 100).toFixed(0)}% | 5 سنين + قيمة نهائية`);
+    } else add('dcf', 'DCF (التدفق النقدي الحر)', null, 'عدد الأسهم ناقص أو معدل الخصم قريب من النمو النهائي');
+  } else add('dcf', 'DCF (التدفق النقدي الحر)', null, fin ? 'مش مناسب للبنوك والقطاع المالي' : (curOK ? 'مفيش تدفق نقدي حر موجب متاح' : 'عملة القوائم مختلفة عن عملة السهم'));
 
-        function saveScalpToJournal() {
-            let asset = document.getElementById('scalpAsset').value;
-            let entry = document.getElementById('entryPrice').value;
-            let sl = document.getElementById('outSL').innerText;
-            let tp = document.getElementById('outTP').innerText;
-            let date = new Date().toLocaleDateString();
+  if (f.pe > 0 && ps && ps.pe) add('pe', 'مضاعف الربحية مقابل القطاع', price * ps.pe / f.pe, `P/E السهم ${f.pe.toFixed(1)} مقابل ${ps.pe.toFixed(1)} (${ps.srcPE === 'peers' ? 'وسيط شركات مشابهة' : 'مرجع تقريبي للقطاع'})`);
+  else add('pe', 'مضاعف الربحية مقابل القطاع', null, 'P/E غير متاح أو سالب');
 
-            journalData.push({ asset, entry, sl, tp, date });
-            localStorage.setItem('v7_journal', JSON.stringify(journalData));
-            renderJournal();
-            alert('Setup saved to Journal successfully!');
-        }
+  if (f.pb > 0 && ps && ps.pb) add('pb', 'مضاعف القيمة الدفترية مقابل القطاع', price * ps.pb / f.pb, `P/B السهم ${f.pb.toFixed(2)} مقابل ${ps.pb.toFixed(2)} (${ps.srcPB === 'peers' ? 'وسيط شركات مشابهة' : 'مرجع تقريبي للقطاع'})`);
+  else add('pb', 'مضاعف القيمة الدفترية مقابل القطاع', null, 'P/B غير متاح');
 
-        function renderJournal() {
-            let tbody = document.getElementById('journalTableBody');
-            if(journalData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">No saved setups yet.</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = journalData.map(item => `
-                <tr class="hover:bg-slate-900/50">
-                    <td class="p-3 font-medium text-emerald-400">${item.asset}</td>
-                    <td class="p-3">${item.entry}</td>
-                    <td class="p-3 text-rose-400">${item.sl}</td>
-                    <td class="p-3 text-emerald-400">${item.tp}</td>
-                    <td class="p-3 text-slate-400">${item.date}</td>
-                </tr>
-            `).join('');
-        }
+  if (f.pe > 0 && g != null && g > 0) {
+    const fpe = U.clamp(g * 100, 5, cfg.pegCap);
+    add('peg', 'PEG (الربحية مقابل النمو)', price * fpe / f.pe, `P/E عادل ${fpe.toFixed(1)} لنمو ${(g * 100).toFixed(0)}%`);
+  } else add('peg', 'PEG (الربحية مقابل النمو)', null, 'مفيش نمو موجب متاح');
 
-        function clearJournal() {
-            journalData = [];
-            localStorage.removeItem('v7_journal');
-            renderJournal();
-        }
+  if (curOK && f.dps > 0 && cfg.r > cfg.tg + 0.02) add('ddm', 'توزيعات الأرباح (DDM)', f.dps * (1 + cfg.tg) / (cfg.r - cfg.tg), `توزيع ${U.fp(f.dps)} للسهم | نمو ${(cfg.tg * 100).toFixed(1)}% | خصم ${(cfg.r * 100).toFixed(0)}%`);
+  else add('ddm', 'توزيعات الأرباح (DDM)', null, 'السهم مش بيوزع أرباح');
 
-        function exportData() {
-            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(journalData));
-            let dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "v7_trading_backup.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
+  M.forEach(m => { if (m.value != null && (m.value > price * 5 || m.value < price * 0.2)) { m.out = true; m.note += ' — قيمة بعيدة جدًا عن السعر، اتشالت من المتوسط'; } });
+  const use = M.filter(m => m.value != null && !m.out);
+  const fair = use.length ? U.med(use.map(m => m.value)) : null;
+  const up = fair ? fair / price - 1 : null;
+  const spread = use.length > 1 ? Math.max(...use.map(m => m.value)) / Math.min(...use.map(m => m.value)) : null;
+  const v = verdictOf(up);
+  return {
+    models: M, fair, upside: up, verdict: v, count: use.length, spread,
+    lo: use.length ? Math.min(...use.map(m => m.value)) : null, hi: use.length ? Math.max(...use.map(m => m.value)) : null,
+    target: f.target, analysts: f.analysts, rec: f.rec, sector: f.sector, industry: f.industry,
+    pe: f.pe, pb: f.pb, g, ps, score: up == null ? null : U.clamp(50 + up * 125, 0, 100)
+  };
+}
 
-        function importData(event) {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    journalData = JSON.parse(e.target.result);
-                    localStorage.setItem('v7_journal', JSON.stringify(journalData));
-                    renderJournal();
-                    alert('Data imported successfully!');
-                } catch(err) {
-                    alert('Invalid JSON backup file.');
-                }
-            };
-            reader.readAsText(file);
-        }
+// ---------- news ----------
+const POS = [['\\bbeat(s)?\\b', 2], ['\\bsurg\\w*', 2], ['\\bsoar\\w*', 2], ['\\brall(y|ies|ied)\\b', 1], ['record (high|profit|revenue|earnings)', 1], ['\\bupgrad\\w*', 2], ['\\braise[sd]?\\b', 1], ['\\bstrong\\w*', 1], ['outperform', 2], ['bullish', 1], ['\\bapprov\\w*', 1], ['partnership', 1], ['\\bexpan\\w*', 1], ['dividend', 1], ['buyback|repurchase', 1], ['breakthrough', 2], ['\\bboost\\w*', 1], ['\\bgain(s|ed)?\\b', 1], ['\\bjump\\w*', 1], ['\\bclimb\\w*', 1], ['\\bprofit\\w*', 1], ['\\bgrowth\\b', 1], ['\\bwins?\\b', 1], ['\\bcontract\\b', 1], ['ارتفاع|ارتفع|يرتفع|صعود', 1], ['قفز', 2], ['أرباح|ارباح|ربح', 1], ['نمو', 1], ['توزيع|كوبون', 1], ['مكاسب', 1], ['اتفاقية|عقد', 1], ['استحواذ', 1], ['زيادة', 1]].map(([s, w]) => [new RegExp(s, 'i'), w]);
+const NEG = [['\\bmiss(es|ed)?\\b', 2], ['\\bplung\\w*', 2], ['\\btumbl\\w*', 2], ['\\bcrash\\w*', 2], ['\\bslump\\w*', 2], ['\\bdowngrad\\w*', 2], ['\\bcuts?\\b', 1], ['lawsuit|\\bsued\\b|\\bprobe\\b|investigat', 2], ['fraud', 3], ['\\brecall\\w*', 1], ['layoff|job cuts', 1], ['\\bloss(es)?\\b', 1], ['\\bweak\\w*', 1], ['bearish', 1], ['\\bwarn\\w*', 1], ['\\bfine[sd]?\\b', 1], ['\\bban(s|ned)?\\b', 1], ['bankrupt', 3], ['\\bdecline\\w*', 1], ['\\bfall(s|ing)?\\b|\\bfell\\b', 1], ['\\bdrop(s|ped)?\\b', 1], ['\\bslash\\w*', 1], ['\\bconcern\\w*', 1], ['\\bdelay\\w*', 1], ['\\bhalt\\w*', 1], ['short seller', 2], ['انخفاض|انخفض|تراجع|هبوط|هبط', 1], ['خسائر|خسارة', 1], ['غرامة', 1], ['دعوى|تحقيق', 2], ['إفلاس|افلاس|تعثر', 3], ['تخفيض', 1], ['شطب|إيقاف|ايقاف', 2], ['أزمة|ازمة', 1], ['ديون', 1]].map(([s, w]) => [new RegExp(s, 'i'), w]);
+const CATS = [
+  ['earnings', 'أرباح/نتائج', /earnings|results|revenue|quarter|أرباح|ارباح|نتائج/i, 'تأثير قوي وسريع غالبًا (خلال أيام) — بيتحدد بمقارنة النتائج بالتوقعات'],
+  ['dividend', 'توزيعات', /dividend|توزيع|كوبون/i, 'تأثير متوسط، غالبًا داعم للسعر قبل تاريخ الاستحقاق'],
+  ['ma', 'استحواذ/اندماج', /acqui|merger|buyout|takeover|استحواذ|اندماج/i, 'تأثير قوي وقت الإعلان، والاتجاه حسب سعر الصفقة'],
+  ['analyst', 'تصنيف المحللين', /upgrad|downgrad|price target|target price|analyst|تصنيف|سعر مستهدف/i, 'تأثير قصير الأجل غالبًا'],
+  ['legal', 'قانوني/تنظيمي', /lawsuit|\bsued\b|\bprobe\b|investigat|\bsec\b|\bfine|regulat|antitrust|دعوى|غرامة|تحقيق|رقابة/i, 'تأثير سلبي أو غير مؤكد لحد حسم الموضوع'],
+  ['macro', 'اقتصاد كلي', /\bfed\b|interest rate|inflation|tariff|recession|الفائدة|التضخم|البنك المركزي|الجنيه|سعر الصرف/i, 'تأثير عام على السوق كله مش السهم لوحده'],
+  ['product', 'منتجات/عقود', /launch|contract|partnership|\bdeal\b|product|طرح|عقد|اتفاقية|مشروع/i, 'تأثير متوسط إلى طويل الأجل']
+];
+function analyzeNews(items, now) {
+  const arr = (items || []).map(it => {
+    const txt = it.title || ''; let p = 0, n = 0;
+    POS.forEach(([re, w]) => { if (re.test(txt)) p += w; });
+    NEG.forEach(([re, w]) => { if (re.test(txt)) n += w; });
+    const s = U.clamp(p - n, -3, 3);
+    const ageD = it.time ? Math.max(0, (now - it.time) / 86400000) : 7;
+    const decay = Math.pow(0.5, ageD / 3);
+    const cats = CATS.filter(c => c[2].test(txt)).map(c => ({ key: c[0], label: c[1], impact: c[3] }));
+    return { ...it, s, label: s > 0 ? 'pos' : s < 0 ? 'neg' : 'neu', decay, cats };
+  });
+  if (!arr.length) return { items: [], count: 0, net: 0, score: 50, label: 'لا يوجد أخبار', color: 'y', cats: [] };
+  const num = arr.reduce((a, x) => a + x.decay * x.s, 0), den = arr.reduce((a, x) => a + x.decay * 3, 0);
+  const net = den ? num / den : 0;
+  const catMap = {}; arr.forEach(x => x.cats.forEach(c => { catMap[c.key] = catMap[c.key] || { ...c, n: 0, s: 0 }; catMap[c.key].n++; catMap[c.key].s += x.s; }));
+  return {
+    items: arr, count: arr.length, net, score: U.clamp(50 + 50 * U.clamp(net * 2.5, -1, 1), 0, 100),
+    label: net > 0.12 ? 'إيجابي' : net < -0.12 ? 'سلبي' : 'محايد / متوازن', color: net > 0.12 ? 'g' : net < -0.12 ? 'r' : 'y',
+    pos: arr.filter(x => x.label === 'pos').length, neg: arr.filter(x => x.label === 'neg').length, cats: Object.values(catMap)
+  };
+}
 
-        // Initialize on load
-        calculateScalp();
-        renderJournal();
-    </script>
+// ---------- final ----------
+function scoreLabel(s) {
+  if (s >= 70) return { label: 'إيجابي قوي', color: 'g' };
+  if (s >= 58) return { label: 'إيجابي', color: 'g' };
+  if (s >= 45) return { label: 'محايد', color: 'y' };
+  if (s >= 32) return { label: 'سلبي', color: 'r' };
+  return { label: 'سلبي قوي', color: 'r' };
+}
+function finalScore(val, tech, wy, news) {
+  const parts = [
+    { k: 'التقييم', w: 0.35, s: val && val.score != null ? val.score : null },
+    { k: 'الفني', w: 0.35, s: tech.score },
+    { k: 'ويكوف', w: 0.15, s: wy.score },
+    { k: 'الأخبار', w: 0.15, s: news && news.count ? news.score : null }
+  ];
+  const av = parts.filter(p => p.s != null); const tw = av.reduce((a, p) => a + p.w, 0);
+  const total = Math.round(av.reduce((a, p) => a + p.w * p.s, 0) / tw);
+  return { total, parts, ...scoreLabel(total) };
+}
+function stance(total, plan, wy, val) {
+  const bad = wy.key === 'markdown' || wy.key === 'distribution';
+  if (total >= 58 && plan.rr1 >= 1.5 && !bad) return 'الصورة العامة داعمة مع نسبة ربح/مخاطرة مقبولة ← مرشّح للمراقبة القريبة أو الدخول المتدرّج.';
+  if (total >= 58 && (plan.rr1 < 1.5 || bad)) return 'الصورة العامة إيجابية لكن الدخول الآن مش مثالي (نسبة R/R ضعيفة أو ويكوف مش داعم) ← الأفضل انتظار تراجع لدعم أو تأكيد.';
+  if (total >= 45) return 'إشارات متضاربة ← راقب، ومتدخلش غير بتأكيد (اختراق بحجم أو ارتداد من دعم).';
+  return 'الصورة سلبية حاليًا ← المستويات تحت للمراقبة فقط، وتجنّب فتح مراكز شراء جديدة لحد ما الاتجاه يتحسن.';
+}
+function analyze(d, sm, peerQuotes, newsItems, cfgAll, market, symbol, now) {
+  const cfg = cfgAll[market] || DEF_CFG.US; const t = technicals(d); const price = t.st.price;
+  const lv = buildLevels(d, t); const plan = tradePlan(price, t.st.atr, lv); const wy = wyckoff(d, t);
+  const f = extractFund(sm); const ps = f ? peerStats(peerQuotes, symbol, f.sector, market) : null;
+  const val = valuation(price, f, ps, cfg); const news = analyzeNews(newsItems, now || Date.now());
+  const fin = finalScore(val, t, wy, news);
+  const short = shortPlan(price, t.st.atr, lv);
+  const rec = scenarioRec(fin, wy, t, val, lv, market, price, t.st.atr);
+  const conf = { long: confirmations('long', t, lv), short: confirmations('short', t, lv) };
+  return { price, t, lv, plan, short, rec, conf, wy, f, val, news, fin, market, cfg, health: healthCheck(f), stance: stance(fin.total, plan, wy, val) };
+}
+
+// ---------- short scenario & recommendation ----------
+function shortPlan(price, atr, lv) {
+  const minD = 0.8 * atr;
+  const s = lv.resistances.find(x => x.price >= price + minD && x.w >= 2) || lv.resistances.find(x => x.price >= price + minD);
+  let sl, slNote;
+  if (s) { sl = s.price + 0.4 * atr; slNote = 'فوق أقرب مقاومة (' + s.src.split(' + ')[0] + ') بمسافة أمان 0.4 ATR'; }
+  else { sl = price + 2 * atr; slNote = 'بدون مقاومة قريبة: 2 × ATR فوق السعر'; }
+  if (sl - price > 3.5 * atr) { sl = price + 3 * atr; slNote = 'المقاومة بعيدة: تم تحديد الخسارة بـ 3 × ATR'; }
+  if (sl - price < atr) { sl = price + atr; slNote = 'الحد الأدنى للمسافة: 1 × ATR'; }
+  const risk = sl - price;
+  const ss = lv.supports.filter(x => x.price <= price - atr);
+  let tp1, tp1Note, tp2, tp2Note;
+  if (ss.length) {
+    tp1 = ss[0].price; tp1Note = 'أقرب دعم (' + ss[0].src.split(' + ')[0] + ')';
+    const s2 = ss.find(x => x.price < tp1 - 0.5 * atr);
+    if (s2) { tp2 = s2.price; tp2Note = 'الدعم التالي (' + s2.src.split(' + ')[0] + ')'; }
+    else { tp2 = price - 3 * risk; tp2Note = 'مفيش دعم تاني: 3 × المخاطرة'; }
+  } else {
+    tp1 = price - 1.5 * risk; tp1Note = 'مفيش دعم قريب: 1.5 × المخاطرة';
+    tp2 = price - 2.5 * risk; tp2Note = '2.5 × المخاطرة';
+  }
+  const floor = price * 0.02;
+  tp1 = Math.max(tp1, floor); tp2 = Math.max(Math.min(tp2, tp1), floor);
+  return {
+    sl, slNote, risk, riskPct: risk / price, tp1, tp1Note, tp2, tp2Note,
+    rr1: (price - tp1) / risk, rr2: (price - tp2) / risk,
+    gain1: (price - tp1) / price, gain2: (price - tp2) / price
+  };
+}
+function scenarioRec(fin, wy, t, val, lv, market, price, atr) {
+  const bearWy = wy.key === 'markdown' || wy.key === 'distribution';
+  const bullWy = wy.key === 'markup' || wy.key === 'accumulation' || wy.key === 'reaccum';
+  const why = [];
+  let side = 'wait', label = 'انتظر / راقب', text = '';
+  if (fin.total >= 58 && !bearWy) {
+    side = 'long'; label = 'شراء مرجّح'; text = 'الصورة العامة إيجابية، فسيناريو الشراء هو الأقرب.';
+  } else if (fin.total <= 42 && (bearWy || t.score < 40)) {
+    side = 'short'; label = 'بيع (Short) مرجّح'; text = 'الصورة العامة سلبية والاتجاه ضعيف، فسيناريو البيع هو الأقرب (تحليل فقط).';
+  } else {
+    text = 'الإشارات مش حاسمة لأي اتجاه، والأفضل انتظار تأكيد (اختراق بحجم أو كسر دعم) قبل أي دخول.';
+  }
+  why.push(`النتيجة العامة ${(fin.total / 10).toFixed(1)}/10 (${fin.label})`);
+  why.push(`الصورة الفنية ${(t.score / 10).toFixed(1)}/10 — ${t.pos} إشارة إيجابية و${t.neg} سلبية`);
+  why.push(`ويكوف: ${wy.title}${bullWy ? ' (داعم للشراء)' : bearWy ? ' (داعم للبيع)' : ''}`);
+  if (val && val.upside != null) why.push(`التقييم: ${val.verdict.label} (${U.pct(val.upside, 0)} عن القيمة العادلة)`);
+  const warnLong = [], warnShort = [];
+  const rsi = t.st.rsi, up0 = val && val.upside;
+  if (rsi != null && rsi > 75) warnLong.push(`RSI ${rsi.toFixed(0)} عالي — الدخول متأخر وخطر تصحيح`);
+  if (up0 != null && up0 < -0.10) warnLong.push('السهم غالي بالتقييم — خطر التراجع أكبر لو الاتجاه اتغير');
+  if (bearWy) warnLong.push('ويكوف بيقول تصريف/هبوط — الشراء ضد الاتجاه');
+  if (t.st.m200 && price < t.st.m200) warnLong.push('السعر تحت MA200 — الاتجاه الطويل هابط');
+  if (market === 'EGX') warnShort.push('البيع على المكشوف في مصر غالبًا مش متاح للأفراد أو بشروط خاصة — اسأل شركة السمسرة. التحليل هنا للفهم أو لتجنّب الشراء.');
+  else warnShort.push('البيع على المكشوف محتاج حساب margin ورسوم استعارة، والخسارة النظرية مفتوحة (السعر ممكن يطلع بلا حد).');
+  if (rsi != null && rsi < 30) warnShort.push(`RSI ${rsi.toFixed(0)} تشبّع بيعي — خطر ارتداد حاد ضد البيع`);
+  if (up0 != null && up0 > 0.10) warnShort.push('السهم رخيص بالتقييم — خطر ارتداد أو short squeeze');
+  if (lv.supports.length && lv.supports[0].w >= 2 && (price - lv.supports[0].price) < 1.5 * atr) warnShort.push('السعر قريب جدًا من دعم قوي — العائد المتاح للبيع محدود');
+  if (bullWy) warnShort.push('ويكوف بيقول تجميع/صعود — البيع ضد الاتجاه');
+  return { side, label, text, why, warnLong, warnShort };
+}
+function confirmations(side, t, lv) {
+  const s = t.st, f = U.fp, a = [];
+  const vol = s.avg20 ? U.fmt(s.avg20, 0) : '—';
+  if (side === 'long') {
+    if (s.dc20.up != null) a.push(`إغلاق يومي فوق أعلى قمة 20 يوم (${f(s.dc20.up)}) — اختراق Donchian`);
+    a.push(`حجم التداول ≥ 1.2× متوسط 20 يوم (المتوسط ${vol})`);
+    a.push('MACD فوق خط الإشارة وRSI فوق 50');
+    if (lv.supports.length) a.push(`بديل أهدأ: انتظر تراجع لأقرب دعم (${f(lv.supports[0].price)}) وشمعة ارتداد واضحة`);
+    return { items: a, invalid: 'الفكرة بتتلغي لو الإغلاق نزل تحت وقف الخسارة.' };
+  }
+  if (s.dc20.lo != null) a.push(`إغلاق يومي تحت أدنى قاع 20 يوم (${f(s.dc20.lo)}) — كسر Donchian`);
+  a.push(`حجم التداول ≥ 1.2× متوسط 20 يوم (المتوسط ${vol})`);
+  a.push('MACD تحت خط الإشارة وRSI تحت 50');
+  if (lv.resistances.length) a.push(`بديل: انتظر ارتداد ضعيف لأقرب مقاومة (${f(lv.resistances[0].price)}) ورفض واضح (شمعة رفض أو إغلاق تحتها)`);
+  return { items: a, invalid: 'الفكرة بتتلغي لو الإغلاق طلع فوق وقف الخسارة.' };
+}
+
+// ---------- company health ----------
+function healthCheck(f) {
+  if (!f) return null;
+  const fin = /financial/i.test(f.sector || '');
+  const items = []; const pc = v => (v * 100).toFixed(1) + '%';
+  const add = (name, val, good, bad, text) => {
+    if (val == null || !isFinite(val)) return;
+    items.push({ name, st: good(val) ? 1 : bad(val) ? -1 : 0, text: text(val) });
+  };
+  add('العائد على حقوق الملكية (ROE)', f.roe, v => v >= 0.15, v => v < 0.05, v => pc(v) + (v >= 0.15 ? ' — ممتاز' : v < 0.05 ? ' — ضعيف' : ' — مقبول'));
+  add('هامش صافي الربح', f.margin, v => v >= 0.10, v => v < 0.03, v => pc(v) + (v >= 0.10 ? ' — قوي' : v < 0.03 ? ' — ضعيف' : ' — مقبول'));
+  add('نمو الإيرادات', f.revG, v => v >= 0.05, v => v < 0, v => pc(v) + (v >= 0.05 ? ' — نمو' : v < 0 ? ' — انكماش' : ' — شبه ثابت'));
+  add('نمو الأرباح', f.earnG, v => v >= 0.05, v => v < 0, v => pc(v) + (v >= 0.05 ? ' — نمو' : v < 0 ? ' — انكماش' : ' — شبه ثابت'));
+  if (!fin) {
+    add('الدين ÷ حقوق الملكية', f.de != null ? f.de / 100 : null, v => v <= 1, v => v > 2, v => v.toFixed(2) + 'x' + (v <= 1 ? ' — دين مريح' : v > 2 ? ' — دين مرتفع' : ' — دين متوسط'));
+    add('نسبة التداول (السيولة)', f.cr, v => v >= 1.5, v => v < 1, v => v.toFixed(2) + (v >= 1.5 ? ' — سيولة جيدة' : v < 1 ? ' — ضغط سيولة' : ' — مقبولة'));
+    if (f.fcf != null) items.push({ name: 'التدفق النقدي الحر', st: f.fcf > 0 ? 1 : -1, text: f.fcf > 0 ? 'موجب' : 'سالب' });
+    if (f.cash != null && f.debt != null && f.debt > 0) add('النقدية ÷ الديون', f.cash / f.debt, v => v >= 1, v => v < 0.2, v => (v * 100).toFixed(0) + '%');
+  }
+  if (f.dyield != null && f.dyield > 0) items.push({ name: 'توزيعات الأرباح', st: f.dyield >= 0.02 ? 1 : 0, text: 'عائد ' + pc(f.dyield) });
+  if (items.length < 3) return { items, score: null, label: 'بيانات غير كافية', color: 'y', fin };
+  const score = 50 + 50 * items.reduce((a, x) => a + x.st, 0) / items.length;
+  const sl = score >= 70 ? { label: 'قوية', color: 'g' } : score >= 55 ? { label: 'جيدة', color: 'g' } : score >= 40 ? { label: 'متوسطة', color: 'y' } : { label: 'ضعيفة', color: 'r' };
+  return { items, score, ...sl, fin };
+}
+
+// ---------- backtest ----------
+function simulate(d, entryAt, exitAt, start, cost) {
+  const n = d.c.length, o = d.o, c = d.c;
+  let inPos = false, pendE = false, pendX = false, entryPx = 0, entryI = 0, eq = 1, peak = 1, maxDD = 0, bars = 0;
+  const trades = [];
+  for (let i = Math.max(1, start); i < n; i++) {
+    if (pendX && inPos) {
+      const px = o[i] * (1 - cost); eq *= px / c[i - 1];
+      trades.push({ ei: entryI, xi: i, ret: px / entryPx - 1 }); inPos = false; pendX = false;
+    } else if (pendE && !inPos) {
+      entryPx = o[i] * (1 + cost); entryI = i; inPos = true; pendE = false; eq *= c[i] / entryPx; bars++;
+    } else if (inPos) { eq *= c[i] / c[i - 1]; bars++; }
+    if (eq > peak) peak = eq;
+    const dd = eq / peak - 1; if (dd < maxDD) maxDD = dd;
+    if (inPos && exitAt(i)) pendX = true;
+    else if (!inPos && !pendE && entryAt(i)) pendE = true;
+  }
+  const wins = trades.filter(x => x.ret > 0), loss = trades.filter(x => x.ret <= 0);
+  return {
+    trades, total: eq - 1, maxDD, exposure: bars / Math.max(1, n - start),
+    winRate: trades.length ? wins.length / trades.length : null,
+    avgWin: wins.length ? U.avg(wins.map(x => x.ret)) : null, avgLoss: loss.length ? U.avg(loss.map(x => x.ret)) : null,
+    open: inPos ? { date: d.dates[entryI], ret: c[n - 1] / entryPx - 1 } : null
+  };
+}
+function backtestAll(d, t) {
+  const n = d.c.length, c = d.c, ind = t.ind, cost = 0.001, out = [];
+  const def = [
+    {
+      key: 'dc', name: 'اختراق Donchian (20 دخول / 10 خروج)', start: 20, desc: 'شراء عند إغلاق فوق أعلى قمة 20 يوم، وخروج عند إغلاق تحت أدنى قاع 10 أيام.',
+      en: i => ind.dc20.up[i - 1] != null && c[i] > ind.dc20.up[i - 1], ex: i => ind.dc10.lo[i - 1] != null && c[i] < ind.dc10.lo[i - 1]
+    },
+    {
+      key: 'ma2050', name: 'تقاطع MA20 / MA50', start: 50, desc: 'شراء عند تقاطع MA20 فوق MA50، وخروج عند تقاطعه تحته.',
+      en: i => ind.sma20[i] != null && ind.sma50[i] != null && ind.sma20[i - 1] != null && ind.sma50[i - 1] != null && ind.sma20[i] > ind.sma50[i] && ind.sma20[i - 1] <= ind.sma50[i - 1],
+      ex: i => ind.sma20[i] != null && ind.sma50[i] != null && ind.sma20[i] < ind.sma50[i]
+    }
+  ];
+  if (n >= 260) def.push({
+    key: 'ma50200', name: 'تقاطع MA50 / MA200 (Golden / Death)', start: 200, desc: 'شراء عند Golden Cross وخروج عند Death Cross.',
+    en: i => ind.sma50[i] != null && ind.sma200[i] != null && ind.sma50[i - 1] != null && ind.sma200[i - 1] != null && ind.sma50[i] > ind.sma200[i] && ind.sma50[i - 1] <= ind.sma200[i - 1],
+    ex: i => ind.sma50[i] != null && ind.sma200[i] != null && ind.sma50[i] < ind.sma200[i]
+  });
+  for (const s of def) {
+    if (n - s.start < 40) continue;
+    const r = simulate(d, s.en, s.ex, s.start, cost);
+    out.push({ ...r, key: s.key, name: s.name, desc: s.desc, start: s.start, startDate: d.dates[s.start], bh: c[n - 1] / c[s.start] - 1, beats: r.total > c[n - 1] / c[s.start] - 1 });
+  }
+  return out;
+}
+
+// ---------- Gann ----------
+const GANN_CYCLES = [30, 45, 60, 90, 120, 180, 270, 360];
+function daysBetween(a, b) { return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000); }
+function addDays(ds, k) { return new Date(Date.parse(ds + 'T00:00:00Z') + k * 86400000).toISOString().slice(0, 10); }
+function gannCalc(d) {
+  const n = d.c.length, price = d.c[n - 1], today = d.dates[n - 1];
+  const sr = Math.sqrt(price), sq = [];
+  for (let k = -4; k <= 4; k++) { if (!k) continue; const v = Math.pow(sr + 0.25 * k, 2); if (v > 0) sq.push({ deg: Math.abs(k) * 45, price: v, up: k > 0 }); }
+  const look = Math.min(252, n), hs = d.h.slice(-look), ls = d.l.slice(-look);
+  const H = Math.max(...hs), L = Math.min(...ls);
+  const iH = n - look + hs.lastIndexOf(H), iL = n - look + ls.lastIndexOf(L);
+  let fan = null;
+  if (Math.abs(iH - iL) >= 5) {
+    const up = iH > iL, unit = (H - L) / Math.abs(iH - iL), bi = up ? iL : iH, base = up ? L : H, bars = n - 1 - bi, dir = up ? 1 : -1;
+    const lines = [['2x1', 2], ['1x1', 1], ['1x2', 0.5]].map(([name, m]) => ({ name, price: base + dir * unit * m * bars }));
+    const [a21, a11, a12] = lines.map(x => x.price); let pos;
+    if (up) pos = price >= a21 ? 'فوق خط 2x1 ← قوة استثنائية' : price >= a11 ? 'فوق خط 1x1 ← قوة' : price >= a12 ? 'بين 1x2 و 1x1 ← صعود أبطأ من الزاوية الأساسية' : 'تحت 1x2 ← فقد الزخم';
+    else pos = price <= a21 ? 'تحت خط 2x1 الهابط ← ضعف شديد' : price <= a11 ? 'تحت خط 1x1 الهابط ← الهبوط مستمر' : price <= a12 ? 'بين 1x1 و 1x2 ← هبوط أبطأ / بداية تعافي' : 'فوق خطوط الهبوط ← تعافي';
+    fan = { up, base, unit, lines, pos, fromDate: d.dates[bi] };
+  }
+  const cycles = [['من أعلى قمة (52 أسبوع)', d.dates[iH]], ['من أدنى قاع (52 أسبوع)', d.dates[iL]]].map(([label, ds]) => {
+    const days = daysBetween(ds, today);
+    const hit = GANN_CYCLES.find(k => Math.abs(days - k) <= 3) || null;
+    const nk = GANN_CYCLES.find(k => k > days + 3) || null;
+    return { label, date: ds, days, hit, next: nk ? { k: nk, date: addDays(ds, nk), inDays: nk - days } : null };
+  });
+  return { sq, fan, cycles, H, L };
+}
+
+// ---------- astro (information only, zero weight in the score) ----------
+const MERC_RETRO = [['2023-04-21', '2023-05-14'], ['2023-08-23', '2023-09-15'], ['2023-12-13', '2024-01-01'], ['2024-04-01', '2024-04-25'], ['2024-08-05', '2024-08-28'], ['2024-11-25', '2024-12-15'],
+['2025-03-15', '2025-04-07'], ['2025-07-18', '2025-08-11'], ['2025-11-09', '2025-11-29'], ['2026-02-26', '2026-03-20'], ['2026-06-29', '2026-07-23'], ['2026-10-24', '2026-11-13'],
+['2027-02-09', '2027-03-03'], ['2027-06-10', '2027-07-04'], ['2027-10-07', '2027-10-28']];
+const SYNODIC = 29.530588853;
+function isMercRetro(ds) { return MERC_RETRO.some(([a, b]) => ds >= a && ds <= b); }
+function moonPhase(ds) { const days = (Date.parse(ds + 'T12:00:00Z') - Date.UTC(2000, 0, 6, 18, 14)) / 86400000; let p = (days / SYNODIC) % 1; if (p < 0) p += 1; return p; }
+function moonName(p) {
+  if (p < 0.03 || p >= 0.97) return 'محاق (قمر جديد)'; if (p < 0.22) return 'هلال متزايد'; if (p < 0.28) return 'تربيع أول';
+  if (p < 0.47) return 'أحدب متزايد'; if (p < 0.53) return 'بدر (قمر كامل)'; if (p < 0.72) return 'أحدب متناقص'; if (p < 0.78) return 'تربيع أخير'; return 'هلال متناقص';
+}
+function astroNow(ds) {
+  const p = moonPhase(ds), cur = MERC_RETRO.find(([a, b]) => ds >= a && ds <= b), nxt = MERC_RETRO.find(([a]) => a > ds);
+  const covered = ds >= MERC_RETRO[0][0] && ds <= MERC_RETRO[MERC_RETRO.length - 1][1];
+  const dNew = Math.round((1 - p) * SYNODIC), dFull = Math.round((((0.5 - p) % 1 + 1) % 1) * SYNODIC);
+  return {
+    phase: p, name: moonName(p), covered, retro: !!cur, retroEnd: cur ? cur[1] : null,
+    next: nxt ? { start: nxt[0], end: nxt[1], inDays: daysBetween(ds, nxt[0]) } : null,
+    newMoon: { date: addDays(ds, dNew), inDays: dNew }, fullMoon: { date: addDays(ds, dFull), inDays: dFull }
+  };
+}
+function welch(a, b) {
+  if (a.length < 5 || b.length < 5) return null;
+  const m = x => x.reduce((s, v) => s + v, 0) / x.length, v = (x, mu) => x.reduce((s, y) => s + (y - mu) * (y - mu), 0) / (x.length - 1);
+  const m1 = m(a), m2 = m(b), se = Math.sqrt(v(a, m1) / a.length + v(b, m2) / b.length);
+  return { m1, m2, n1: a.length, n2: b.length, t: se ? (m1 - m2) / se : 0 };
+}
+function astroStats(d) {
+  const n = d.c.length, from = MERC_RETRO[0][0], to = MERC_RETRO[MERC_RETRO.length - 1][1];
+  const G = { retro: [[], []], wax: [[], []], nnew: [[], []], nfull: [[], []] };
+  for (let i = 1; i < n; i++) {
+    const ds = d.dates[i]; if (ds < from || ds > to) continue;
+    const r = d.c[i] / d.c[i - 1] - 1, p = moonPhase(ds);
+    G.retro[isMercRetro(ds) ? 0 : 1].push(r); G.wax[p < 0.5 ? 0 : 1].push(r);
+    G.nnew[(p < 0.07 || p > 0.93) ? 0 : 1].push(r); G.nfull[(p > 0.43 && p < 0.57) ? 0 : 1].push(r);
+  }
+  const row = (key, label, a, b) => ({ key, label, a, b, w: welch(G[key][0], G[key][1]) });
+  return [
+    row('retro', 'عطارد تراجعي', 'أيام عطارد التراجعي', 'باقي الأيام'),
+    row('wax', 'القمر متزايد / متناقص', 'من المحاق للبدر', 'من البدر للمحاق'),
+    row('nnew', 'حول القمر الجديد (±2 يوم)', 'حول المحاق', 'باقي الأيام'),
+    row('nfull', 'حول البدر (±2 يوم)', 'حول البدر', 'باقي الأيام')
+  ];
+}
+
+// ==== CORE END
+
+// ================= UI =================
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const LS = {
+  get(k, dflt) { try { const v = localStorage.getItem(k); return v == null ? dflt : JSON.parse(v); } catch (e) { return dflt; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+};
+let WORKER = LS.get('sa_worker', '');
+(function () {
+  const w = new URLSearchParams(location.search).get('w');
+  if (w) { WORKER = w.replace(/\/+$/, ''); LS.set('sa_worker', WORKER); try { history.replaceState(null, '', location.pathname); } catch (e) { } }
+})();
+let CFG = LS.get('sa_cfg', null) || JSON.parse(JSON.stringify(DEF_CFG));
+['US', 'EGX'].forEach(k => { CFG[k] = Object.assign({}, DEF_CFG[k], CFG[k] || {}); });
+let WATCH = LS.get('sa_watch', []);
+let ALIAS = LS.get('sa_alias', {});
+let charts = [], drawnSym = null, busy = false, current = null, scnSide = 'long';
+const cache = new Map();
+
+// Arabic names for big EGX names (used for Arabic news search)
+const EGX_AR = {
+  'COMI.CA': 'البنك التجاري الدولي', 'TMGH.CA': 'طلعت مصطفى', 'EAST.CA': 'إيسترن كومباني', 'HRHO.CA': 'هيرميس',
+  'SWDY.CA': 'السويدي إليكتريك', 'ETEL.CA': 'المصرية للاتصالات', 'EFIH.CA': 'إي فاينانس', 'ABUK.CA': 'أبو قير للأسمدة',
+  'MFPC.CA': 'موبكو', 'ORWE.CA': 'النساجون الشرقيون', 'PHDC.CA': 'بالم هيلز', 'ESRS.CA': 'حديد عز', 'ORAS.CA': 'أوراسكوم للإنشاء',
+  'ADIB.CA': 'مصرف أبوظبي الإسلامي مصر', 'CIEB.CA': 'كريدي أجريكول مصر', 'FWRY.CA': 'فوري', 'JUFO.CA': 'جهينة',
+  'EMFD.CA': 'إعمار مصر', 'OCDI.CA': 'سوديك', 'CLHO.CA': 'مستشفى كليوباترا', 'EGAL.CA': 'مصر للألومنيوم',
+  'SKPC.CA': 'سيدي كرير للبتروكيماويات', 'AMOC.CA': 'أموك', 'BTFH.CA': 'بلتون القابضة', 'CCAP.CA': 'القلعة', 'EKHO.CA': 'القابضة المصرية الكويتية'
+};
+
+async function api(path, params, type) {
+  if (!WORKER) throw new Error('no_worker');
+  const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 25000);
+  try {
+    const r = await fetch(WORKER + path + '?' + new URLSearchParams(params), { signal: ac.signal });
+    if (!r.ok) { const e = new Error('HTTP ' + r.status); e.status = r.status; if (r.status === 404) e.nf = true; throw e; }
+    return type === 'text' ? await r.text() : await r.json();
+  } finally { clearTimeout(to); }
+}
+async function getChart(s) {
+  const js = await api('/chart', { symbol: s, range: '2y' });
+  const d = parseChart(js);
+  if (!d) { const e = new Error('nf'); e.nf = true; throw e; }
+  return d;
+}
+async function getPeers(sym) {
+  const r = await api('/peers', { symbol: sym });
+  const list = ((r && r.finance && r.finance.result && r.finance.result[0] && r.finance.result[0].recommendedSymbols) || []).map(x => x.symbol).slice(0, 10);
+  if (!list.length) return [];
+  const q = await api('/quote', { symbols: list.join(',') });
+  return (q && q.quoteResponse && q.quoteResponse.result) || [];
+}
+function parseRss(txt, items) {
+  try {
+    const doc = new DOMParser().parseFromString(txt, 'text/xml');
+    doc.querySelectorAll('item').forEach((it, i) => {
+      if (i > 14) return;
+      const g = tag => { const e = it.querySelector(tag); return e ? e.textContent : ''; };
+      const title = g('title'); if (!title) return;
+      items.push({ title, publisher: g('source') || 'Google News', link: g('link'), time: Date.parse(g('pubDate')) || 0 });
+    });
+  } catch (e) { }
+}
+async function getNews(sym, name, market) {
+  const items = []; const ar = ALIAS[sym] || EGX_AR[sym] || null;
+  const jobs = [
+    api('/news', { symbol: sym }),
+    api('/rss', { q: (name || sym) + (market === 'EGX' ? ' Egypt' : ' stock'), lang: 'en' }, 'text')
+  ];
+  if (market === 'EGX' && ar) jobs.push(api('/rss', { q: ar + ' سهم', lang: 'ar' }, 'text'));
+  const rs = await Promise.allSettled(jobs);
+  rs.forEach((x, i) => {
+    if (x.status !== 'fulfilled' || !x.value) return;
+    if (i === 0) {
+      (x.value.news || []).forEach(n => { if (n.title) items.push({ title: n.title, publisher: n.publisher || 'Yahoo', link: n.link, time: (n.providerPublishTime || 0) * 1000 }); });
+    } else parseRss(x.value, items);
+  });
+  const seen = new Set(); const out = [];
+  items.sort((x, y) => (y.time || 0) - (x.time || 0)).forEach(x => {
+    const k = x.title.toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, '').slice(0, 50);
+    if (!seen.has(k)) { seen.add(k); out.push(x); }
+  });
+  return out.slice(0, 15);
+}
+
+async function fetchAnalysis(sym, st) {
+  st = st || (() => { });
+  const hit = cache.get(sym); if (hit && Date.now() - hit.t < 300000) return hit.r;
+  let used = sym, d;
+  st('بجيب الأسعار…');
+  try { d = await getChart(sym); }
+  catch (e) {
+    if (!sym.includes('.') && (e.nf || e.status === 404)) { used = sym + '.CA'; st('مش لاقي ' + sym + ' — بجرّب ' + used + '…'); d = await getChart(used); }
+    else throw e;
+  }
+  const market = used.endsWith('.CA') ? 'EGX' : 'US';
+  const name = d.meta.longName || d.meta.shortName || used;
+  st('بجيب البيانات المالية والأخبار والشركات المشابهة…');
+  const [sumR, peerR, newsR] = await Promise.allSettled([api('/summary', { symbol: used }), getPeers(used), getNews(used, name, market)]);
+  st('بحلل…');
+  const sm = sumR.status === 'fulfilled' ? sumR.value : null;
+  const res = analyze(d, sm, peerR.status === 'fulfilled' ? peerR.value : [], newsR.status === 'fulfilled' ? newsR.value : [], CFG, market, used, Date.now());
+  res.symbol = used; res.name = (res.f && res.f.name) || name; res.d = d; res.cur = d.meta.currency || (res.f && res.f.priceCur) || '';
+  res.fundFail = !res.f; res.newsFail = newsR.status !== 'fulfilled';
+  const o = { t: Date.now(), r: res }; cache.set(used, o); cache.set(sym, o);
+  return res;
+}
+
+function setStatus(t) { $('status').textContent = t || ''; }
+function showErr(html) { const e = $('err'); if (html) { e.innerHTML = html; e.hidden = false; } else e.hidden = true; }
+
+async function run(symIn, keepTab) {
+  const sym = (symIn || $('sym').value).trim().toUpperCase().replace(/\s+/g, '');
+  if (!sym) return;
+  if (!WORKER) { openSettings(); showErr('لازم تحط رابط الـ Worker الأول من ⚙️ الإعدادات.'); return; }
+  if (busy) return; busy = true; $('btnGo').disabled = true; showErr('');
+  $('sym').value = sym; setStatus('بجيب الأسعار…');
+  try {
+    const res = await fetchAnalysis(sym, setStatus);
+    $('sym').value = res.symbol;
+    current = res; render(res, keepTab); setStatus(''); LS.set('sa_last', res.symbol);
+  } catch (e) {
+    setStatus('');
+    if (e.nf || e.message === 'nf' || e.status === 404) await suggest(sym);
+    else if (e.message === 'no_worker') showErr('لازم تحط رابط الـ Worker من ⚙️ الإعدادات.');
+    else showErr('حصلت مشكلة في جلب البيانات (' + esc(e.message) + '). اتأكد إن رابط الـ Worker صح وإنك متصل بالإنترنت، وجرّب تاني بعد شوية.');
+  } finally { busy = false; $('btnGo').disabled = false; }
+}
+async function suggest(sym) {
+  let html = 'مش لاقي سهم بالرمز <b>' + esc(sym) + '</b>. جرّب الرمز الصحيح (للمصري زوّد <b>.CA</b> زي COMI.CA).';
+  try {
+    const r = await api('/search', { q: sym });
+    const list = (r.quotes || []).filter(q => q.symbol).slice(0, 6);
+    if (list.length) html += '<div style="margin-top:6px">يمكن تقصد:</div>' + list.map(q => `<span class="chip" style="cursor:pointer" data-s="${esc(q.symbol)}">${esc(q.symbol)} <b>${esc((q.shortname || q.longname || '').slice(0, 24))}</b></span>`).join(' ');
+  } catch (e) { }
+  showErr(html);
+  $('err').querySelectorAll('[data-s]').forEach(el => el.onclick = () => run(el.dataset.s));
+}
+
+// ---------- helpers ----------
+const col = c => c === 'g' ? 'var(--g)' : c === 'r' ? 'var(--r)' : 'var(--y)';
+const cls = c => c === 'g' ? 'pos' : c === 'r' ? 'neg' : 'neu';
+const tg = (txt, c) => `<span class="tag ${c || ''}">${txt}</span>`;
+const s10 = v => (v / 10).toFixed(1);
+const P = U.fp;
+function ago(ms) {
+  if (!ms) return ''; const m = (Date.now() - ms) / 60000;
+  if (m < 60) return 'منذ ' + Math.max(1, Math.round(m)) + ' دقيقة';
+  if (m < 1440) return 'منذ ' + Math.round(m / 60) + ' ساعة';
+  return 'منذ ' + Math.round(m / 1440) + ' يوم';
+}
+const recColor = rec => rec.side === 'long' ? 'g' : rec.side === 'short' ? 'r' : 'y';
+const phaseColor = key => ({ accumulation: 'g', reaccum: 'g', markup: 'g', distribution: 'r', markdown: 'r' })[key] || 'y';
+
+// ---------- render ----------
+function render(r, keepTab) {
+  const d = r.d, n = d.c.length, chg = d.c[n - 1] / d.c[n - 2] - 1;
+  scnSide = r.rec.side === 'short' ? 'short' : 'long';
+  // sticky
+  $('stick').innerHTML = `<div class="sk"><div style="min-width:0"><b>${esc(r.name)}</b> <span class="mut" dir="ltr" style="display:inline-block">${esc(r.symbol)}</span>
+    <div><span class="price">${P(r.price)}</span> <span class="mut" style="font-size:12px">${esc(r.cur)}</span> <span class="${chg >= 0 ? 'pos' : 'neg'}" dir="ltr" style="display:inline-block">${U.pct(chg, 2)}</span></div></div>
+    <div class="skr"><div class="sc" style="color:${col(r.fin.color)}">${s10(r.fin.total)}<small>/10</small></div><div class="skv">${esc(r.fin.label)} · ${esc(r.rec.label)}</div></div></div>`;
+  $('stick').hidden = false;
+  $('p-sum').innerHTML = rSummary(r);
+  $('p-val').innerHTML = rVal(r);
+  $('p-tech').innerHTML = rTech(r);
+  $('p-wy').innerHTML = rWy(r);
+  $('p-news').innerHTML = rNews(r);
+  $('p-scn').innerHTML = rScn(r);
+  $('p-bt').innerHTML = rBt(r);
+  $('p-gann').innerHTML = rGann(r);
+  wireDynamic(r);
+  $('cmpA').value = r.symbol;
+  drawnSym = null;
+  showTab(keepTab || 'sum');
+}
+
+function rSummary(r) {
+  const vd = r.val ? r.val.verdict : null; const inWatch = WATCH.includes(r.symbol);
+  const pc = phaseColor(r.wy.key);
+  const sp = r.rec.side === 'short' ? r.short : r.plan;
+  const mini = (title, val, c, sub) => `<div class="mini"><small>${title}</small><b class="${cls(c)}">${val}</b>${sub ? `<div class="mut" style="font-size:12px">${sub}</div>` : ''}</div>`;
+  const tc = r.t.score >= 58 ? 'g' : r.t.score < 42 ? 'r' : 'y';
+  return `<div class="card">
+    <div class="top">
+      <div class="gauge" style="--p:${r.fin.total};--c:${col(r.fin.color)}"><span style="font-size:24px">${s10(r.fin.total)}</span></div>
+      <div style="flex:1;min-width:220px">
+        <div class="nm">${esc(r.name)} <button class="ico" id="btnStar" style="padding:0 8px;margin-inline-start:6px">${WATCH.includes(r.symbol) ? '★' : '☆'}</button></div>
+        <div>${tg('النتيجة العامة: ' + r.fin.label + ' (' + s10(r.fin.total) + '/10)', r.fin.color)}</div>
+        <div class="mut" style="margin-top:6px;font-size:14px">${esc(r.stance)}</div>
+      </div>
+    </div>
+    <div class="parts">${r.fin.parts.map(p => `<div class="part"><b style="color:${p.s == null ? 'var(--mut)' : col(scoreLabel(p.s).color)}">${p.s == null ? '—' : s10(p.s)}</b><small>${p.k} (${Math.round(p.w * 100)}%)</small></div>`).join('')}</div>
+    <div class="minis">
+      ${mini('التقييم', vd ? vd.label : 'غير متاح', vd ? vd.color : 'y', r.val && r.val.fair ? 'عادلة ≈ ' + P(r.val.fair) + ' (' + U.pct(r.val.upside, 0) + ')' : '')}
+      ${mini('الفني', tc === 'g' ? 'إيجابي' : tc === 'r' ? 'سلبي' : 'محايد', tc, r.t.pos + ' ▲ / ' + r.t.neg + ' ▼')}
+      ${mini('ويكوف', esc(r.wy.title), pc, esc(r.wy.stage))}
+      ${mini('السيناريو المرجّح', esc(r.rec.label), recColor(r.rec), r.rec.side === 'wait' ? '' : 'SL ' + P(sp.sl) + ' | TP1 ' + P(sp.tp1) + ' | R/R ' + sp.rr1.toFixed(1))}
+    </div>
+    ${r.fundFail ? '<div class="warn">⚠️ البيانات المالية مش متاحة لهذا السهم من Yahoo، فالنتيجة معتمدة على الفني وويكوف والأخبار بس.</div>' : ''}
+    ${(r.market === 'EGX' && !r.news.count) ? '<div class="mut" style="font-size:12px;margin-top:8px">ملحوظة: مفيش أخبار متاحة للسهم ده، فالنتيجة معتمدة على باقي العناصر. جرّب البحث بالعربي من تبويب «أخبار».</div>' : ''}
+  </div>`;
+}
+
+function rVal(r) {
+  const cur = r.cur; let vh = '';
+  if (r.val) {
+    const v = r.val, vd = v.verdict;
+    const nums = v.models.filter(m => m.value != null && !m.out).map(m => m.value).concat([r.price]);
+    const lo = Math.min(...nums) * 0.92, hi = Math.max(...nums) * 1.08, pc = x => ((x - lo) / (hi - lo) * 100).toFixed(1);
+    const dots = v.models.filter(m => m.value != null && !m.out).map(m => `<div class="dot" style="left:${pc(m.value)}%;background:var(--b)" title="${esc(m.name)}"></div>`).join('');
+    vh = `<h2>القيمة العادلة <small>${v.count} نموذج</small></h2>
+    <div>${v.fair ? `<span class="price" style="font-size:22px">${P(v.fair)}</span> <span class="mut">${esc(cur)} (الوسيط)</span> ${tg(vd.label, vd.color)} <span class="${v.upside >= 0 ? 'pos' : 'neg'}" style="direction:ltr;display:inline-block">${U.pct(v.upside)} من السعر</span>` : '<span class="mut">مفيش نماذج كفاية لتقدير قيمة عادلة</span>'}</div>
+    ${v.fair ? `<div class="scale"><div class="bar"></div>${dots}
+      <div class="dot" style="left:${pc(r.price)}%;background:var(--y);width:18px;height:18px;top:13px"></div>
+      <div class="dot" style="left:${pc(v.fair)}%;background:var(--g);width:18px;height:18px;top:13px"></div>
+      <div class="tick" style="left:${pc(r.price)}%;color:var(--y)">السعر</div><div class="tick d" style="left:${pc(v.fair)}%;color:var(--g)">العادلة</div></div>
+      <div class="mut" style="font-size:12px">● أزرق = كل نموذج | أصفر = السعر الحالي | أخضر = القيمة العادلة (الوسيط)</div>` : ''}
+    ${v.spread && v.spread > 2.5 ? '<div class="warn">⚠️ فيه تشتت كبير بين النماذج، خُد النتيجة بحذر.</div>' : ''}
+    ${v.count < 3 && v.count > 0 ? '<div class="warn">⚠️ عدد النماذج قليل (أقل من 3) فالدقة محدودة.</div>' : ''}
+    <div class="tw"><table><thead><tr><th>النموذج</th><th>القيمة</th><th>مقابل السعر</th></tr></thead><tbody>
+    ${v.models.map(m => `<tr><td>${esc(m.name)}<div class="mut" style="font-size:12px">${esc(m.note)}</div></td><td class="n">${m.value == null ? '—' : P(m.value)}</td><td class="n ${m.value == null ? '' : (m.value >= r.price ? 'pos' : 'neg')}">${m.value == null ? '—' : U.pct(m.value / r.price - 1, 0)}</td></tr>`).join('')}
+    ${v.target ? `<tr><td>سعر المحللين المستهدف (مرجع فقط)<div class="mut" style="font-size:12px">${v.analysts ? v.analysts + ' محلل' : ''} ${esc(v.rec || '')}</div></td><td class="n">${P(v.target)}</td><td class="n ${v.target >= r.price ? 'pos' : 'neg'}">${U.pct(v.target / r.price - 1, 0)}</td></tr>` : ''}
+    </tbody></table></div>`;
+  } else vh = `<h2>القيمة العادلة</h2><div class="mut">البيانات المالية مش متاحة لهذا السهم.</div>`;
+
+  let sh = '<h2>المقارنة بالقطاع</h2>';
+  if (r.val && r.val.ps) {
+    const ps = r.val.ps;
+    const rel = (a, b) => (a > 0 && b > 0) ? (a / b - 1) : null;
+    const rpe = rel(r.val.pe, ps.pe), rpb = rel(r.val.pb, ps.pb);
+    const tx = x => x == null ? '—' : (x < -0.1 ? `<span class="pos">أرخص من القطاع بـ ${Math.abs(x * 100).toFixed(0)}%</span>` : x > 0.1 ? `<span class="neg">أغلى من القطاع بـ ${(x * 100).toFixed(0)}%</span>` : '<span class="neu">قريب من القطاع</span>');
+    sh += `<div class="mut">القطاع: ${esc(r.val.sector || '—')} ${r.val.industry ? '— ' + esc(r.val.industry) : ''}</div>
+    <div class="tw"><table><thead><tr><th></th><th>السهم</th><th>القطاع</th><th>الحكم</th></tr></thead><tbody>
+    <tr><td>P/E</td><td class="n">${r.val.pe ? r.val.pe.toFixed(1) : '—'}</td><td class="n">${ps.pe.toFixed(1)}</td><td>${tx(rpe)}</td></tr>
+    <tr><td>P/B</td><td class="n">${r.val.pb ? r.val.pb.toFixed(2) : '—'}</td><td class="n">${ps.pb.toFixed(2)}</td><td>${tx(rpb)}</td></tr></tbody></table></div>
+    <div class="mut" style="font-size:12px;margin-top:6px">${ps.srcPE === 'peers' || ps.srcPB === 'peers' ? 'المرجع = وسيط الشركات المشابهة من Yahoo.' : ''} ${ps.srcPE === 'ref' || ps.srcPB === 'ref' ? 'ملحوظة: جزء من المقارنة بمرجع تقريبي للقطاع (مش مباشر من السوق)، خصوصًا في البورصة المصرية.' : ''}</div>
+    ${ps.peers.length ? `<div class="mut" style="font-size:12px;margin-top:6px">شركات مشابهة: ${ps.peers.slice(0, 8).map(p => `<span dir="ltr">${esc(p.symbol)}${p.pe ? ' (' + p.pe.toFixed(0) + ')' : ''}</span>`).join('، ')}</div>` : ''}`;
+  } else sh += '<div class="mut">مفيش بيانات كفاية للمقارنة.</div>';
+  return `<div class="grid"><div class="card">${vh}</div><div class="card">${sh}</div><div class="card full">${rHealth(r)}</div></div>`;
+}
+
+function rHealth(r) {
+  const h = r.health;
+  if (!h) return '<h2>صحة الشركة</h2><div class="mut">البيانات المالية مش متاحة لهذا السهم.</div>';
+  if (h.score == null) return `<h2>صحة الشركة</h2><div class="mut">البيانات المتاحة قليلة (${h.items.length} بند) فمفيش تقييم موثوق.</div>`;
+  return `<h2>صحة الشركة <small>${h.items.length} بند</small></h2>
+   <div>${tg('الحالة: ' + h.label + ' (' + s10(h.score) + '/10)', h.color)}${h.fin ? ' <span class="mut" style="font-size:12px">قطاع مالي: بنستبعد الديون والسيولة لأنها مش مقياس مناسب للبنوك.</span>' : ''}</div>
+   <div class="tw"><table><tbody>${h.items.map(x => `<tr><td style="width:26px" class="${x.st > 0 ? 'pos' : x.st < 0 ? 'neg' : 'neu'}">${x.st > 0 ? '✔' : x.st < 0 ? '✖' : '●'}</td><td>${esc(x.name)}</td><td class="mut">${esc(x.text)}</td></tr>`).join('')}</tbody></table></div>
+   <div class="mut" style="font-size:12px;margin-top:6px">معلومات مساعدة بس ومش داخلة في النتيجة العامة. أرقام Yahoo للشركات المصرية ممكن تكون ناقصة أو متأخرة.</div>`;
+}
+
+function rBt(r) {
+  const res = backtestAll(r.d, r.t), pc = v => v == null ? '—' : U.pct(v, 1);
+  if (!res.length) return '<div class="card mut">البيانات قصيرة جدًا للباكتست.</div>';
+  const rows = res.map(s => `<tr><td>${esc(s.name)}<div class="mut" style="font-size:12px">${esc(s.desc)}</div></td>
+    <td class="n">${s.trades.length}${s.open ? ' +1 مفتوحة' : ''}</td><td class="n">${s.winRate == null ? '—' : (s.winRate * 100).toFixed(0) + '%'}</td>
+    <td class="n">${pc(s.avgWin)} / ${pc(s.avgLoss)}</td><td class="n ${s.total >= 0 ? 'pos' : 'neg'}">${pc(s.total)}</td>
+    <td class="n ${s.bh >= 0 ? 'pos' : 'neg'}">${pc(s.bh)}</td><td class="n neg">${pc(s.maxDD)}</td></tr>`).join('');
+  const notes = res.map(s => {
+    const few = s.trades.length < 5 ? ' (عدد الصفقات قليل فالنتيجة مش موثوقة)' : '';
+    return `<li><b>${esc(s.name)}:</b> ${s.beats ? 'تفوّقت على الشراء والاحتفاظ' : 'ما تفوّقتش على الشراء والاحتفاظ'} في الفترة دي${few}.</li>`;
+  }).join('');
+  const last = res.find(s => s.trades.length) || res[0];
+  return `<div class="card"><h2>باكتست على تاريخ السهم نفسه <small>${r.d.dates[0]} ← ${r.d.dates[r.d.dates.length - 1]}</small></h2>
+   <div class="mut" style="font-size:13px">بيجرّب إشارات بسيطة على الأسعار اللي فاتت: الإشارة عند الإغلاق والتنفيذ على افتتاح اليوم التالي، مع تكلفة 0.1% للدخول و0.1% للخروج.</div>
+   <div class="tw" style="margin-top:8px"><table><thead><tr><th>الاستراتيجية</th><th>صفقات</th><th>نجاح</th><th>متوسط ربح / خسارة</th><th>العائد</th><th>شراء واحتفاظ</th><th>أقصى هبوط</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <ul class="rs">${notes}</ul>
+   ${last.trades.length ? `<details><summary>آخر صفقات ${esc(last.name)}</summary><div class="tw"><table><tbody>${last.trades.slice(-8).reverse().map(x => `<tr><td class="n">${r.d.dates[x.ei]} ← ${r.d.dates[x.xi]}</td><td class="n ${x.ret >= 0 ? 'pos' : 'neg'}">${U.pct(x.ret, 1)}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+   <div class="warn">⚠️ الأداء السابق مش ضمان للمستقبل. العينة هنا حوالي سنتين بس، فاعتبرها إشارة على مدى ملاءمة الاستراتيجية للسهم ده مش دليل قاطع.</div></div>`;
+}
+
+function rGann(r) {
+  const g = gannCalc(r.d), today = r.d.dates[r.d.dates.length - 1], a = astroNow(today), st = astroStats(r.d);
+  const sqRows = g.sq.slice().sort((x, y) => y.price - x.price).map(x => `<tr><td>${x.up ? 'مقاومة' : 'دعم'} ${x.deg}°</td><td class="n ${x.up ? 'neg' : 'pos'}">${P(x.price)}</td><td class="n mut">${U.pct(x.price / r.price - 1)}</td></tr>`).join('');
+  const fan = g.fan ? `<div class="mut" style="font-size:13px">مروحة جان من ${g.fan.up ? 'أدنى قاع' : 'أعلى قمة'} (${g.fan.fromDate}) بزاوية 1x1 = ميل الحركة الرئيسية الأخيرة:</div>
+    <div class="tw"><table><tbody>${g.fan.lines.map(x => `<tr><td>${x.name}</td><td class="n">${x.price > 0 ? P(x.price) : '—'}</td></tr>`).join('')}</tbody></table></div>
+    <div>${tg(g.fan.pos, g.fan.up ? (g.fan.pos.startsWith('فوق') ? 'g' : 'y') : (g.fan.pos.startsWith('فوق') ? 'g' : 'r'))}</div>` : '<div class="mut">مفيش حركة رئيسية واضحة كفاية لرسم المروحة.</div>';
+  const cyc = g.cycles.map(c => `<tr><td>${esc(c.label)}<div class="mut" style="font-size:12px">${c.date}</div></td><td class="n">${c.days} يوم</td><td>${c.hit ? tg('قريب من دورة ' + c.hit + ' يوم', 'y') : '—'}${c.next ? `<div class="mut" style="font-size:12px">القادمة: ${c.next.k} يوم (${c.next.date}) بعد ${c.next.inDays} يوم</div>` : ''}</td></tr>`).join('');
+  const stRows = st.map(x => {
+    if (!x.w) return `<tr><td>${esc(x.label)}</td><td class="mut">بيانات قليلة</td></tr>`;
+    const sig = Math.abs(x.w.t) >= 2;
+    return `<tr><td><b>${esc(x.label)}</b><div class="n" style="white-space:normal;text-align:right;direction:rtl;font-size:13px">${esc(x.a)}: ${U.pct(x.w.m1, 2)} (${x.w.n1} يوم)<br>${esc(x.b)}: ${U.pct(x.w.m2, 2)} (${x.w.n2} يوم)</div>
+      <div style="margin-top:2px">${sig ? tg('فرق ملحوظ إحصائيًا (t=' + x.w.t.toFixed(1) + ')', 'y') : tg('مفيش فرق يُعتد به (t=' + x.w.t.toFixed(1) + ')')}</div></td></tr>`;
+  }).join('');
+  const astro = a.covered ? `<ul class="rs">
+    <li>القمر النهارده: <b>${a.name}</b> — البدر القادم ${a.fullMoon.date} (بعد ${a.fullMoon.inDays} يوم) والمحاق القادم ${a.newMoon.date} (بعد ${a.newMoon.inDays} يوم).</li>
+    <li>عطارد: ${a.retro ? `<b>في حالة تراجع حاليًا</b> (ينتهي ${a.retroEnd})` : 'مش في تراجع'}${a.next ? ` — التراجع القادم يبدأ ${a.next.start} (بعد ${a.next.inDays} يوم) ويخلص ${a.next.end}.` : '.'}</li></ul>`
+    : '<div class="mut">جدول عطارد التراجعي المدمج بيغطي 2023–2027 تقريبًا، والتاريخ ده برّاه.</div>';
+  return `<div class="grid">
+   <div class="card"><h2>جان: مربع التسعة <small>مستويات من جذر السعر</small></h2>
+     <div class="tw"><table><tbody>${sqRows}</tbody></table></div>
+     <div class="mut" style="font-size:12px;margin-top:4px">كل 45° = ربع وحدة في جذر السعر. هتلاقيها أحيانًا بتتطابق مع دعوم ومقاومات أخرى، وده اللي بيدّيها أهمية.</div></div>
+   <div class="card"><h2>جان: المروحة والدورات الزمنية</h2>${fan}
+     <div class="tw" style="margin-top:8px"><table><tbody>${cyc}</tbody></table></div>
+     <div class="mut" style="font-size:12px;margin-top:4px">الأيام بالتقويم من آخر قمة وقاع. دورات جان (30 / 45 / 60 / 90 / 120 / 180 / 270 / 360) بتعتبر نوافذ احتمال تغيّر اتجاه، مش مواعيد مؤكدة. الزاوية 1x1 بتعتمد على مقياس الرسم، فاعتبرها مرجع تقريبي.</div></div>
+   <div class="card full"><h2>الفلك <small>معلومات فقط — وزنها صفر في النتيجة</small></h2>${astro}
+     <div class="tw"><table><thead><tr><th>متوسط العائد اليومي على السهم ده، حسب كل فكرة</th></tr></thead><tbody>${stRows}</tbody></table></div>
+     <div class="warn">⚠️ مفيش دليل علمي إن حركة الكواكب أو القمر بتتنبأ بأسعار الأسهم. الجدول بيختبر الفكرة على تاريخ السهم نفسه: لو |t| أقل من 2 يبقى الفرق غالبًا صدفة. وحتى لو فيه فرق، مع اختبار 4 أفكار مرة واحدة احتمال إن واحدة تطلع "ملحوظة" بالصدفة لوحدها مش صغير. فاعتبرها فضول مش إشارة دخول.</div></div>
+  </div>`;
+}
+
+function rTech(r) {
+  const t = r.t, s = t.st, lv = r.lv;
+  const sigRows = t.signals.map(x => `<tr><td style="width:26px" class="${x.v > 0 ? 'pos' : x.v < 0 ? 'neg' : 'neu'}">${x.v > 0 ? '▲' : x.v < 0 ? '▼' : '●'}</td><td>${esc(x.name)}<div class="mut" style="font-size:12px">${esc(x.text)}</div></td></tr>`).join('');
+  const th = `<h2>المؤشرات الفنية <small>${t.pos} إيجابي / ${t.neg} سلبي</small></h2>
+  <div>${tg('الصورة الفنية: ' + (t.score >= 58 ? 'إيجابية' : t.score < 42 ? 'سلبية' : 'محايدة') + ' (' + s10(t.score) + '/10)', t.score >= 58 ? 'g' : t.score < 42 ? 'r' : 'y')}</div>
+  <div class="tw"><table><tbody>${sigRows}</tbody></table></div>
+  <div class="tw" style="margin-top:8px"><table><tbody>
+   <tr><td>MA 20 / 50 / 100 / 200</td><td class="n">${P(s.m20)} / ${P(s.m50)} / ${P(s.m100)} / ${P(s.m200)}</td></tr>
+   <tr><td>Donchian 20 (أعلى / أدنى)</td><td class="n">${P(s.dc20.up)} / ${P(s.dc20.lo)}</td></tr>
+   <tr><td>Donchian 55 (أعلى / أدنى)</td><td class="n">${P(s.dc55.up)} / ${P(s.dc55.lo)}</td></tr>
+   <tr><td>RSI / MACD / ATR</td><td class="n">${s.rsi ? s.rsi.toFixed(0) : '—'} / ${s.macd != null ? s.macd.toFixed(2) : '—'} / ${P(s.atr)} (${(s.atrPct * 100).toFixed(1)}%)</td></tr>
+  </tbody></table></div>`;
+  const stars = w => '★'.repeat(Math.min(4, Math.max(1, Math.round(w / 1.5))));
+  const lrow = (x, c) => `<tr><td class="n ${c}">${P(x.price)}</td><td class="n mut">${U.pct(x.price / r.price - 1)}</td><td>${esc(x.src)} <span class="mut">${stars(x.w)}</span></td></tr>`;
+  const lh = `<h2>الدعوم والمقاومات <small>★ = قوة المستوى</small></h2>
+  <div class="mut" style="font-size:13px">المقاومات (فوق السعر)</div>
+  <div class="tw"><table><tbody>${lv.resistances.slice(0, 4).reverse().map(x => lrow(x, 'neg')).join('') || '<tr><td class="mut">لا يوجد (السهم عند قمة جديدة)</td></tr>'}</tbody></table></div>
+  <div class="mut" style="font-size:13px;margin-top:6px">الدعوم (تحت السعر)</div>
+  <div class="tw"><table><tbody>${lv.supports.slice(0, 4).map(x => lrow(x, 'pos')).join('') || '<tr><td class="mut">لا يوجد (السهم عند قاع جديد)</td></tr>'}</tbody></table></div>
+  <div class="mut" style="font-size:13px;margin-top:8px">52 أسبوع: قمة ${P(lv.H)} (${U.pct(lv.H / r.price - 1, 0)}) — قاع ${P(lv.L)} (${U.pct(lv.L / r.price - 1, 0)})</div>
+  <details><summary>مستويات فيبوناتشي (${lv.upTrend ? 'تصحيح من قمة' : 'ارتداد من قاع'})</summary>
+   <div class="tw"><table><tbody>${lv.fibs.map(f => `<tr><td>${(f.r * 100).toFixed(1)}%</td><td class="n">${P(f.price)}</td><td class="n mut">${U.pct(f.price / r.price - 1)}</td></tr>`).join('')}</tbody></table></div></details>`;
+  return `<div class="grid"><div class="card">${th}</div><div class="card">${lh}</div></div>`;
+}
+
+function rWy(r) {
+  const w = r.wy, pc = phaseColor(w.key);
+  return `<div class="card"><h2>ويكوف <small>تقدير آلي — ثقة ${w.conf}</small></h2>
+   <div style="font-size:18px;font-weight:700" class="${cls(pc)}">${esc(w.title)}</div>
+   <div>${esc(w.stage)}</div>
+   ${w.sub ? `<div class="mut" style="margin-top:2px">${esc(w.sub)}</div>` : ''}
+   ${w.range ? `<div class="mut" style="margin-top:4px;font-size:13px">حدود النطاق: ${P(w.range.lo)} – ${P(w.range.hi)}</div>` : ''}
+   <ul class="rs">${w.reasons.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+   <div class="mut" style="font-size:12px;margin-top:6px">التصنيف بيعتمد على نطاق آخر 60 يوم، الاتجاه السابق، حجم الصعود/الهبوط، وإشارات Spring/Upthrust. لازم تتأكد منه بالعين على الشارت.</div></div>`;
+}
+
+function rNews(r) {
+  const nw = r.news;
+  const alias = ALIAS[r.symbol] || EGX_AR[r.symbol] || '';
+  const aliasBox = r.market === 'EGX' ? `<div style="margin-top:12px"><div class="mut" style="font-size:12px">بحث بالعربي: اكتب اسم الشركة زي ما بيتكتب في الأخبار</div>
+    <div class="row" style="margin-top:4px"><input id="aliasIn" class="fld ar" value="${esc(alias)}" placeholder="مثال: البنك التجاري الدولي"><button class="go sm" id="aliasBtn">ابحث</button></div></div>` : '';
+  return `<div class="card"><h2>الأخبار وتأثيرها <small>قراءة آلية بالكلمات</small></h2>
+   ${nw.count ? `<div>${tg('الاتجاه العام: ' + nw.label, nw.color)} <span class="mut" style="font-size:13px">${nw.pos} إيجابي / ${nw.neg} سلبي من ${nw.count}</span></div>
+   ${nw.cats.length ? `<ul class="rs">${nw.cats.sort((a, b) => b.n - a.n).slice(0, 4).map(c => `<li><b>${c.label}</b> (${c.n}): ${esc(c.impact)}</li>`).join('')}</ul>` : ''}
+   <div class="news">${nw.items.map(x => `<div class="nrow"><span class="${x.label === 'pos' ? 'pos' : x.label === 'neg' ? 'neg' : 'neu'}">${x.label === 'pos' ? '▲' : x.label === 'neg' ? '▼' : '●'}</span> <a href="${esc(x.link || '#')}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a><br><small>${esc(x.publisher)} · ${ago(x.time)} ${x.cats.map(c => tg(c.label)).join('')}</small></div>`).join('')}</div>
+   <div class="mut" style="font-size:12px;margin-top:6px">التقييم بيعتمد على كلمات العنوان فقط (وبيدّي وزن أكبر للأحدث)، مش بديل لقراءة الخبر نفسه.</div>`
+      : `<div class="mut">${r.newsFail ? 'تعذّر جلب الأخبار.' : 'مفيش أخبار حديثة لهذا السهم (شائع في أسهم البورصة المصرية).'}</div>`}
+   ${aliasBox}</div>`;
+}
+
+function rScn(r) {
+  const isL = scnSide === 'long', rec = r.rec;
+  const pl = isL ? r.plan : r.short;
+  const g1 = isL ? pl.tp1Pct : pl.gain1, g2 = isL ? pl.tp2Pct : pl.gain2;
+  const rrC = x => x >= 2 ? 'pos' : x >= 1 ? 'neu' : 'neg';
+  const cf = r.conf[scnSide];
+  const warns = isL ? rec.warnLong : rec.warnShort;
+  const trail = isL ? r.t.st.trail10 : r.t.st.trail10hi;
+  const against = (isL && rec.side === 'short') || (!isL && rec.side === 'long');
+  const seg = `<div class="seg">
+    <button data-side="long" class="${isL ? 'on' : ''}">📈 سيناريو شراء (Long)${rec.side === 'long' ? '<em>مرجّح</em>' : ''}</button>
+    <button data-side="short" class="${!isL ? 'on' : ''}">📉 سيناريو بيع (Short)${rec.side === 'short' ? '<em>مرجّح</em>' : ''}</button></div>`;
+  return `<div class="card">${seg}
+    <div class="${cls(recColor(rec))}" style="font-weight:700">${esc(rec.label)} — ${s10(r.fin.total)}/10</div>
+    <div class="mut" style="font-size:14px">${esc(rec.text)}</div>
+    <ul class="rs">${rec.why.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    ${against ? '<div class="warn">⚠️ السيناريو ده عكس الاتجاه المرجّح حاليًا، المستويات للدراسة أو المراقبة.</div>' : ''}
+    <h2 style="margin-top:12px">${isL ? 'خطة الشراء' : 'خطة البيع (Short)'}</h2>
+    <div class="tw"><table><tbody>
+     <tr><td>🔵 الدخول</td><td class="n">${P(r.price)} <span class="mut">(السعر الحالي)</span></td></tr>
+     <tr><td>🔴 وقف الخسارة (SL)</td><td class="n neg">${P(pl.sl)} (${U.pct(pl.sl / r.price - 1)})</td></tr>
+     <tr><td colspan="2" class="mut" style="font-size:12px">${esc(pl.slNote)} — المخاطرة ${(pl.riskPct * 100).toFixed(1)}% من السعر</td></tr>
+     <tr><td>🟢 الهدف الأول (TP1)</td><td class="n pos">${P(pl.tp1)} (ربح ${(g1 * 100).toFixed(1)}%)</td></tr>
+     <tr><td colspan="2" class="mut" style="font-size:12px">${esc(pl.tp1Note)} — R/R = <b class="${rrC(pl.rr1)}">${pl.rr1.toFixed(1)}</b></td></tr>
+     <tr><td>🟢 الهدف الثاني (TP2)</td><td class="n pos">${P(pl.tp2)} (ربح ${(g2 * 100).toFixed(1)}%)</td></tr>
+     <tr><td colspan="2" class="mut" style="font-size:12px">${esc(pl.tp2Note)} — R/R = <b class="${rrC(pl.rr2)}">${pl.rr2.toFixed(1)}</b></td></tr>
+     <tr><td>وقف متحرك (Donchian 10)</td><td class="n">${P(trail)}</td></tr>
+    </tbody></table></div>
+    <div style="margin-top:10px"><b>تأكيد الدخول:</b><ul class="rs">${cf.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <div class="mut" style="font-size:13px">${esc(cf.invalid)}</div></div>
+    ${warns.map(x => `<div class="warn">⚠️ ${esc(x)}</div>`).join('')}
+    <h2 style="margin-top:14px">حاسبة حجم الصفقة</h2>
+    <div class="row2g">
+      <div><div class="lbl">رأس المال (${esc(r.cur)})</div><input id="capIn" class="fld" type="number" inputmode="decimal" value="${LS.get('sa_cap', 100000)}"></div>
+      <div><div class="lbl">أقصى مخاطرة للصفقة (%)</div><input id="riskIn" class="fld" type="number" inputmode="decimal" step="0.25" value="${LS.get('sa_risk', 1)}"></div>
+    </div>
+    <div id="sizeOut" style="margin-top:10px"></div>
+  </div>`;
+}
+
+function calcSize() {
+  const r = current; if (!r || !$('capIn')) return;
+  const cap = parseFloat($('capIn').value) || 0, rk = parseFloat($('riskIn').value) || 0;
+  LS.set('sa_cap', cap); LS.set('sa_risk', rk);
+  const isL = scnSide === 'long'; const pl = isL ? r.plan : r.short;
+  const rps = Math.abs(r.price - pl.sl);
+  let shares = rps > 0 ? Math.floor((cap * rk / 100) / rps) : 0, note = '';
+  if (shares * r.price > cap) { shares = Math.floor(cap / r.price); note = 'اتقلّل العدد لأن قيمة الصفقة كانت هتعدّي رأس المال.'; }
+  if (shares < 1) { $('sizeOut').innerHTML = '<div class="warn">المبلغ أو نسبة المخاطرة صغيرة جدًا لشراء سهم واحد بالمستويات دي.</div>'; return; }
+  const val = shares * r.price, maxLoss = shares * rps;
+  const gain = tp => shares * Math.abs(tp - r.price);
+  $('sizeOut').innerHTML = `<div class="tw"><table><tbody>
+   <tr><td>عدد الأسهم</td><td class="n"><b>${U.fmt(shares, 0)}</b></td></tr>
+   <tr><td>قيمة الصفقة</td><td class="n">${U.fmt(val, 0)} (${(val / cap * 100).toFixed(0)}% من رأس المال)</td></tr>
+   <tr><td>أقصى خسارة عند SL</td><td class="n neg">${U.fmt(maxLoss, 0)} (${(maxLoss / cap * 100).toFixed(2)}%)</td></tr>
+   <tr><td>ربح عند TP1</td><td class="n pos">${U.fmt(gain(pl.tp1), 0)}</td></tr>
+   <tr><td>ربح عند TP2</td><td class="n pos">${U.fmt(gain(pl.tp2), 0)}</td></tr></tbody></table></div>
+   ${note ? `<div class="mut" style="font-size:12px">${note}</div>` : ''}
+   <div class="mut" style="font-size:12px">الحساب بيتجاهل العمولات والانزلاق السعري، وللـ Short بيفترض إن البيع متاح.</div>`;
+}
+
+function wireDynamic(r) {
+  const star = $('btnStar'); if (star) star.onclick = () => { toggleWatch(r.symbol); star.textContent = WATCH.includes(r.symbol) ? '★' : '☆'; };
+  const ab = $('aliasBtn'); if (ab) ab.onclick = () => {
+    const v = $('aliasIn').value.trim(); if (v) ALIAS[r.symbol] = v; else delete ALIAS[r.symbol];
+    LS.set('sa_alias', ALIAS); cache.delete(r.symbol); run(r.symbol, 'news');
+  };
+  bindScn();
+}
+function bindScn() {
+  document.querySelectorAll('#p-scn [data-side]').forEach(b => b.onclick = () => { scnSide = b.dataset.side; $('p-scn').innerHTML = rScn(current); bindScn(); });
+  ['capIn', 'riskIn'].forEach(id => { const e = $(id); if (e) e.oninput = calcSize; });
+  calcSize();
+}
+
+// ---------- charts ----------
+function drawCharts(r) {
+  charts.forEach(c => { try { c.remove(); } catch (e) { } }); charts = [];
+  ['chMain', 'chRsi', 'chMacd', 'chObv'].forEach(id => $(id).innerHTML = '');
+  if (!window.LightweightCharts) { $('chMain').innerHTML = '<div class="mut">تعذّر تحميل مكتبة الرسم (محتاجة إنترنت).</div>'; return; }
+  const LC = LightweightCharts, d = r.d, t = r.t, ind = t.ind, n = d.c.length;
+  const base = h => ({ height: h, layout: { background: { color: 'transparent' }, textColor: '#8fa0c0' }, grid: { vertLines: { color: '#1a2438' }, horzLines: { color: '#1a2438' } }, rightPriceScale: { borderColor: '#1f2a44' }, timeScale: { borderColor: '#1f2a44' }, crosshair: { mode: 0 }, handleScale: { mouseWheel: false }, localization: { priceFormatter: v => U.fp(v) } });
+  const ls = a => a.map((v, i) => v == null ? null : { time: d.dates[i], value: v }).filter(Boolean);
+  const mk = (id, h) => { const ch = LC.createChart($(id), { ...base(h), width: $(id).clientWidth || 600 }); charts.push(ch); return ch; };
+  const main = mk('chMain', 380);
+  const cs = main.addCandlestickSeries({ upColor: '#22c55e', downColor: '#ef4444', borderVisible: false, wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
+  cs.setData(d.dates.map((x, i) => ({ time: x, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i] })));
+  const line = (arr, color, w, style) => { const s = main.addLineSeries({ color, lineWidth: w || 1, lineStyle: style || 0, priceLineVisible: false, lastValueVisible: false }); s.setData(ls(arr)); return s; };
+  line(ind.sma20, '#a78bfa', 1); line(ind.sma50, '#3b82f6', 2); line(ind.sma200, '#f59e0b', 2);
+  line(ind.dc20.up, '#14b8a6', 1, 2); line(ind.dc20.lo, '#14b8a6', 1, 2);
+  const vol = main.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: 'vol', priceLineVisible: false, lastValueVisible: false });
+  vol.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+  vol.setData(d.dates.map((x, i) => ({ time: x, value: d.v[i], color: d.c[i] >= d.o[i] ? '#22c55e55' : '#ef444455' })));
+  const pl = (price, color, title, w) => cs.createPriceLine({ price, color, lineWidth: w || 1, lineStyle: 2, axisLabelVisible: true, title });
+  const sp = r.rec.side === 'short' ? r.short : r.plan; const sideTag = r.rec.side === 'short' ? ' (Short)' : '';
+  pl(sp.sl, '#ef4444', 'SL' + sideTag, 2); pl(sp.tp1, '#22c55e', 'TP1' + sideTag, 2); pl(sp.tp2, '#16a34a', 'TP2' + sideTag, 1);
+  r.lv.supports.slice(0, 2).forEach(x => pl(x.price, '#22c55e88', 'دعم')); r.lv.resistances.slice(0, 2).forEach(x => pl(x.price, '#ef444488', 'مقاومة'));
+
+  const c2 = mk('chRsi', 130); const rs = c2.addLineSeries({ color: '#e6ebf5', lineWidth: 1, priceLineVisible: false }); rs.setData(ls(ind.rsi));
+  [70, 30].forEach(v => rs.createPriceLine({ price: v, color: '#8fa0c0', lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: '' }));
+  const c3 = mk('chMacd', 150);
+  c3.addHistogramSeries({ priceLineVisible: false, lastValueVisible: false }).setData(ind.macd.hist.map((v, i) => v == null ? null : { time: d.dates[i], value: v, color: v >= 0 ? '#22c55e88' : '#ef444488' }).filter(Boolean));
+  c3.addLineSeries({ color: '#3b82f6', lineWidth: 1, priceLineVisible: false, lastValueVisible: false }).setData(ls(ind.macd.line));
+  c3.addLineSeries({ color: '#f59e0b', lineWidth: 1, priceLineVisible: false, lastValueVisible: false }).setData(ls(ind.macd.sig));
+  const c4 = mk('chObv', 130); c4.addLineSeries({ color: '#14b8a6', lineWidth: 1, priceLineVisible: false }).setData(ls(ind.obv));
+
+  const from = d.dates[Math.max(0, n - 170)], to = d.dates[n - 1]; let lock = false;
+  charts.forEach(ch => ch.timeScale().subscribeVisibleTimeRangeChange(rg => {
+    if (lock || !rg) return; lock = true;
+    charts.forEach(o => { if (o !== ch) { try { o.timeScale().setVisibleRange(rg); } catch (e) { } } });
+    lock = false;
+  }));
+  try { main.timeScale().setVisibleRange({ from, to }); } catch (e) { main.timeScale().fitContent(); }
+  drawnSym = r.symbol;
+}
+function resizeCharts() {
+  if (!charts.length) return;
+  ['chMain', 'chRsi', 'chMacd', 'chObv'].forEach((id, i) => { try { if ($(id).clientWidth) charts[i].applyOptions({ width: $(id).clientWidth }); } catch (e) { } });
+}
+window.addEventListener('resize', resizeCharts);
+
+// ---------- tabs ----------
+function showTab(t) {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'p-' + t));
+  if (t === 'chart' && current) { if (drawnSym !== current.symbol) drawCharts(current); else resizeCharts(); }
+  if (t === 'cmp' && !$('cmpA').value && current) $('cmpA').value = current.symbol;
+  if (t === 'scan' && !$('scanOut').innerHTML) drawScan([], WATCH.length, true);
+}
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => showTab(b.dataset.t));
+
+// ---------- compare ----------
+async function doCompare() {
+  const a = $('cmpA').value.trim().toUpperCase(), b = $('cmpB').value.trim().toUpperCase();
+  if (!a || !b) { $('cmpOut').innerHTML = '<div class="warn">اكتب رمزين.</div>'; return; }
+  if (!WORKER) { openSettings(); return; }
+  $('cmpGo').disabled = true; $('cmpOut').innerHTML = '<div class="mut">بحلل السهمين…</div>';
+  try {
+    const [ra, rb] = await Promise.all([fetchAnalysis(a), fetchAnalysis(b)]);
+    const rows = [
+      ['السعر', r => P(r.price) + ' ' + r.cur, null, null],
+      ['النتيجة العامة /10', r => s10(r.fin.total), r => r.fin.total, 'hi'],
+      ['التقييم', r => r.val ? r.val.verdict.label : '—', null, null],
+      ['الفرق عن القيمة العادلة', r => r.val && r.val.upside != null ? U.pct(r.val.upside, 0) : '—', r => r.val ? r.val.upside : null, 'hi'],
+      ['الصورة الفنية /10', r => s10(r.t.score), r => r.t.score, 'hi'],
+      ['RSI', r => r.t.st.rsi ? r.t.st.rsi.toFixed(0) : '—', null, null],
+      ['ويكوف', r => r.wy.title, r => r.wy.score, 'hi'],
+      ['الأخبار', r => r.news.count ? r.news.label : '—', r => r.news.count ? r.news.score : null, 'hi'],
+      ['المخاطرة % (وقف الشراء)', r => (r.plan.riskPct * 100).toFixed(1) + '%', r => r.plan.riskPct, 'lo'],
+      ['R/R للهدف الأول (شراء)', r => r.plan.rr1.toFixed(1), r => r.plan.rr1, 'hi'],
+      ['السيناريو المرجّح', r => r.rec.label, null, null]
+    ];
+    const body = rows.map(([lbl, f, num, dir]) => {
+      let ca = '', cb = '';
+      if (num && dir) { const x = num(ra), y = num(rb); if (x != null && y != null && x !== y) { const aWins = dir === 'hi' ? x > y : x < y; if (aWins) ca = 'win'; else cb = 'win'; } }
+      return `<tr><td>${lbl}</td><td class="${ca}">${esc(f(ra))}</td><td class="${cb}">${esc(f(rb))}</td></tr>`;
+    }).join('');
+    $('cmpOut').innerHTML = `<div class="tw"><table><thead><tr><th></th><th dir="ltr">${esc(ra.symbol)}</th><th dir="ltr">${esc(rb.symbol)}</th></tr></thead><tbody>${body}</tbody></table></div>
+      <div class="mut" style="font-size:12px;margin-top:6px">الأخضر العريض = الأفضل في البند ده. المقارنة معلومات مش توصية.</div>`;
+  } catch (e) {
+    $('cmpOut').innerHTML = `<div class="warn">${e.nf || e.status === 404 ? 'واحد من الرمزين مش موجود. (للمصري زوّد .CA)' : 'حصلت مشكلة: ' + esc(e.message)}</div>`;
+  } finally { $('cmpGo').disabled = false; }
+}
+$('cmpGo').onclick = doCompare;
+
+// ---------- scanner ----------
+let scanning = false;
+function drawScan(rows, total, idle) {
+  if (!WATCH.length) { $('scanOut').innerHTML = '<div class="mut">قايمة المتابعة فاضية — حلّل سهم واضغط ☆ لإضافته.</div>'; return; }
+  if (idle) { $('scanOut').innerHTML = `<div class="mut">فيه ${WATCH.length} سهم في القايمة: <span dir="ltr">${WATCH.map(esc).join(', ')}</span></div>`; return; }
+  const ok = rows.filter(x => x.r).sort((a, b) => b.r.fin.total - a.r.fin.total), bad = rows.filter(x => !x.r);
+  $('scanOut').innerHTML = `<div class="mut" style="font-size:13px;margin-bottom:6px">${rows.length} / ${total}${rows.length < total ? ' — شغّال…' : ' — خلص'}</div>
+  <div class="tw"><table><thead><tr><th>السهم</th><th>النتيجة</th><th>التقييم</th><th>ويكوف</th><th>السيناريو</th></tr></thead><tbody>
+  ${ok.map(({ sym, r }) => `<tr class="click" data-s="${esc(r.symbol)}"><td dir="ltr" style="text-align:left"><b>${esc(r.symbol)}</b><div class="mut" style="font-size:11px">${P(r.price)} ${esc(r.cur)}</div></td>
+    <td class="n ${cls(r.fin.color)}"><b>${s10(r.fin.total)}</b></td><td>${r.val ? esc(r.val.verdict.label) : '—'}</td><td>${esc(r.wy.title)}</td><td class="${cls(recColor(r.rec))}">${esc(r.rec.label)}</td></tr>`).join('')}
+  ${bad.map(x => `<tr><td dir="ltr" style="text-align:left">${esc(x.sym)}</td><td colspan="4" class="neg">فشل التحليل</td></tr>`).join('')}
+  </tbody></table></div><div class="mut" style="font-size:12px;margin-top:6px">اضغط على أي صف لفتح التحليل الكامل.</div>`;
+  $('scanOut').querySelectorAll('tr[data-s]').forEach(tr => tr.onclick = () => { run(tr.dataset.s); });
+}
+async function runScan() {
+  if (scanning) return;
+  if (!WORKER) { openSettings(); return; }
+  if (!WATCH.length) { drawScan([], 0); return; }
+  scanning = true; $('scanGo').disabled = true;
+  const rows = [], list = [...WATCH], total = list.length; let i = 0;
+  drawScan(rows, total);
+  const worker = async () => {
+    while (i < total) {
+      const sym = list[i++];
+      try { rows.push({ sym, r: await fetchAnalysis(sym) }); } catch (e) { rows.push({ sym }); }
+      drawScan(rows, total);
+    }
+  };
+  try { await Promise.all([worker(), worker()]); } finally { scanning = false; $('scanGo').disabled = false; }
+}
+$('scanGo').onclick = runScan;
+
+// ---------- watchlist & examples ----------
+function toggleWatch(s) { WATCH = WATCH.includes(s) ? WATCH.filter(x => x !== s) : [...WATCH, s]; LS.set('sa_watch', WATCH); drawWatch(); }
+function drawWatch() {
+  $('watch').innerHTML = WATCH.length ? WATCH.map(s => `<span class="chip"><span data-s="${esc(s)}" style="cursor:pointer">${esc(s)}</span><b data-x="${esc(s)}">✕</b></span>`).join('') : '<span class="mut" style="font-size:13px">فاضية — اضغط ☆ جنب اسم السهم لإضافته.</span>';
+  $('watch').querySelectorAll('[data-s]').forEach(e => e.onclick = () => run(e.dataset.s));
+  $('watch').querySelectorAll('[data-x]').forEach(e => e.onclick = () => toggleWatch(e.dataset.x));
+}
+$('examples').innerHTML = ['AAPL', 'NVDA', 'MSFT', 'COMI.CA', 'TMGH.CA', 'EAST.CA'].map(s => `<span class="chip ex" data-s="${s}" style="cursor:pointer">${s}</span>`).join('');
+$('examples').querySelectorAll('[data-s]').forEach(e => e.onclick = () => run(e.dataset.s));
+
+// ---------- settings ----------
+function fillSettings() {
+  $('sWorker').value = WORKER || '';
+  [['us', 'US'], ['eg', 'EGX']].forEach(([p, k]) => { $(p + 'R').value = (CFG[k].r * 100).toFixed(1); $(p + 'Tg').value = (CFG[k].tg * 100).toFixed(1); $(p + 'Cap').value = (CFG[k].gCap * 100).toFixed(0); $(p + 'Peg').value = CFG[k].pegCap; });
+}
+function openSettings() { fillSettings(); $('mSet').classList.add('on'); }
+$('btnSet').onclick = openSettings;
+$('sClose').onclick = () => $('mSet').classList.remove('on');
+$('sReset').onclick = () => { CFG = JSON.parse(JSON.stringify(DEF_CFG)); LS.set('sa_cfg', CFG); fillSettings(); };
+$('sSave').onclick = () => {
+  WORKER = $('sWorker').value.trim().replace(/\/+$/, ''); LS.set('sa_worker', WORKER);
+  [['us', 'US'], ['eg', 'EGX']].forEach(([p, k]) => {
+    const num = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ? v : d; };
+    CFG[k] = { r: num(p + 'R', DEF_CFG[k].r * 100) / 100, tg: num(p + 'Tg', DEF_CFG[k].tg * 100) / 100, gCap: num(p + 'Cap', DEF_CFG[k].gCap * 100) / 100, pegCap: num(p + 'Peg', DEF_CFG[k].pegCap) };
+  });
+  LS.set('sa_cfg', CFG); cache.clear(); $('mSet').classList.remove('on'); showErr('');
+  if (current) run(current.symbol);
+};
+$('btnGo').onclick = () => run();
+$('sym').addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+drawWatch();
+if (!WORKER) { showErr('أول مرة؟ افتح ⚙️ الإعدادات وحط رابط الـ Worker (من Cloudflare) مرة واحدة بس على كل جهاز.'); }
+</script>
 </body>
 </html>
